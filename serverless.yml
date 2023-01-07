@@ -1,0 +1,104 @@
+service: thing-api
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  memorySize: 256
+  region: eu-west-2
+  stage: ${opt:stage, 'dev'}
+  timeout: 30
+  environment:
+    METRICS_TABLE: '${self:service}-${self:provider.stage}-metrics'
+    DATASETS_TABLE: '${self:service}-${self:provider.stage}-datasets'
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+      Resource: '*'
+
+plugins:
+  - serverless-dynamodb-local
+  - serverless-esbuild
+  - serverless-offline
+
+package:
+  exclude:
+    - 'ui/**'
+    - 'api/node_modules/aws-sdk'
+
+custom:
+  dynamodb:
+    stages:
+      - dev
+    start:
+      port: 8000
+      inMemory: true
+      migrate: true
+
+functions:
+  createDataset:
+    handler: api/handlers.createDataset
+    events:
+      - http:
+          path: datasets
+          method: post
+          cors: true
+  updateDataset:
+    handler: api/handlers.updateDataset
+    events:
+      - http:
+          path: datasets/{datasetId}
+          method: put
+          cors: true
+  getMetric:
+    handler: api/handlers.getMetric
+    events:
+      - http:
+          path: datasets/{datasetId}/metrics/{metricId}
+          method: get
+          cors: true
+
+resources:
+  Resources:
+    DatasetsDynamoDbTable:
+      Type: 'AWS::DynamoDB::Table'
+      DeletionPolicy: Retain
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        BillingMode: PROVISIONED
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        StreamSpecification:
+          StreamViewType: NEW_AND_OLD_IMAGES
+        TableName: ${self:provider.environment.DATASETS_TABLE}
+    ValuesDynamoDbTable:
+      Type: 'AWS::DynamoDB::Table'
+      DeletionPolicy: Retain
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: 'S'
+          - AttributeName: t
+            AttributeType: 'N'
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+          - AttributeName: t
+            KeyType: RANGE
+        BillingMode: PROVISIONED
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        StreamSpecification:
+          StreamViewType: NEW_AND_OLD_IMAGES
+        TableName: ${self:provider.environment.METRICS_TABLE}
