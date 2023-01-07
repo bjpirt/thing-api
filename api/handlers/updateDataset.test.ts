@@ -28,7 +28,10 @@ const execute = (
   dataset: UpdateDataset
 ): void | Promise<APIGatewayProxyResultV2> =>
   updateDataset(
-    { body: JSON.stringify(dataset) } as APIGatewayProxyEventV2,
+    {
+      body: JSON.stringify(dataset),
+      pathParameters: { datasetId: 'foo' }
+    } as unknown as APIGatewayProxyEventV2,
     {} as Context,
     {} as Callback<APIGatewayProxyResultV2>
   )

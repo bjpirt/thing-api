@@ -37,7 +37,10 @@ describe('createDataset', () => {
 
   it("should return an error if the json won't parse", async () => {
     const result = await updateDataset(
-      { body: 'notJson' } as APIGatewayProxyEventV2,
+      {
+        body: 'notJson',
+        pathParameters: { datasetId: 'foo' }
+      } as unknown as APIGatewayProxyEventV2,
       {} as Context,
       {} as Callback<APIGatewayProxyResultV2>
     )
@@ -49,7 +52,9 @@ describe('createDataset', () => {
 
   it('should return an error if the body is missing', async () => {
     const result = await updateDataset(
-      {} as APIGatewayProxyEventV2,
+      {
+        pathParameters: { datasetId: 'foo' }
+      } as unknown as APIGatewayProxyEventV2,
       {} as Context,
       {} as Callback<APIGatewayProxyResultV2>
     )

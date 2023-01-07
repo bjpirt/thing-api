@@ -1,5 +1,5 @@
 import { APIGatewayProxyResultV2 } from 'aws-lambda'
-import ErrorResponse from '../types/errorResponse'
+import ErrorResponse from '../types/ErrorResponse'
 
 export const send400 = (content: ErrorResponse): APIGatewayProxyResultV2 => ({
   statusCode: 400,
