@@ -35,3 +35,19 @@ Conceptually, there are two main types of object in the API:
 ## DELETE /datasets/:datasetId/metrics/:metricId
 
 # How to deploy
+
+# To Do
+
+The project is still working towards the MVP and there are a number of items still on the To Do list:
+
+_MVP_
+[ ] User login
+[ ] Authentication with token from login
+[ ] Keys API for datasets
+[ ] Basic user interface
+
+_Future_
+[ ] Multiple users
+[ ] Configurable retention periods for metric data
+[ ] Downsampling of metric data with retention periods
+[ ] Time-series statistical calculations
