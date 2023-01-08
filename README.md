@@ -161,7 +161,7 @@ The project is still working towards the MVP and there are a number of items sti
 _MVP_
 
 - [x] User login
-- [ ] Authentication with token from login
+- [x] Authentication with token from login
 - [ ] Keys API for datasets
 - [ ] Basic user interface
 

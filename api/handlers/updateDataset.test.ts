@@ -48,4 +48,20 @@ describe('createDataset', () => {
       body: JSON.stringify({ errors: ['Unknown server error'] })
     })
   })
+
+  it('should return a 500 error if the dataset ID is missing', async () => {
+    const result = await updateDataset(
+      {
+        body: '{}',
+        pathParameters: {}
+      } as unknown as APIGatewayProxyEventV2,
+      {} as Context,
+      {} as Callback<APIGatewayProxyResultV2>
+    )
+
+    expect(result).toStrictEqual({
+      statusCode: 500,
+      body: JSON.stringify({ errors: ['Unknown server error'] })
+    })
+  })
 })
