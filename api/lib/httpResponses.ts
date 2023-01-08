@@ -6,6 +6,10 @@ export const send400 = (content: ErrorResponse): APIGatewayProxyResultV2 => ({
   body: JSON.stringify(content)
 })
 
+export const send401 = (): APIGatewayProxyResultV2 => ({
+  statusCode: 401
+})
+
 export const send404 = (): APIGatewayProxyResultV2 => ({
   statusCode: 404
 })
