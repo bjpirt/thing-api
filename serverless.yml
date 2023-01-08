@@ -22,6 +22,16 @@ provider:
         - dynamodb:PutItem
         - dynamodb:UpdateItem
       Resource: '*'
+  httpApi:
+    cors: true
+    authorizers:
+      authorizer:
+        type: request
+        functionName: authorizer
+        resultTtlInSeconds: 0
+        enableSimpleResponses: true
+        identitySource:
+          - $request.header.Authorization
 
 plugins:
   - serverless-dynamodb-local
@@ -31,7 +41,7 @@ plugins:
 package:
   exclude:
     - 'ui/**'
-    - 'api/node_modules/aws-sdk'
+    - 'node_modules/aws-sdk'
 
 custom:
   dynamodb:
@@ -46,31 +56,36 @@ functions:
   createDataset:
     handler: api/handlers.createDataset
     events:
-      - http:
-          path: datasets
+      - httpApi:
+          path: /datasets
           method: post
-          cors: true
+          authorizer:
+            name: authorizer
   updateDataset:
     handler: api/handlers.updateDataset
     events:
-      - http:
-          path: datasets/{datasetId}
+      - httpApi:
+          path: /datasets/{datasetId}
           method: put
-          cors: true
+          authorizer:
+            name: authorizer
   getMetric:
     handler: api/handlers.getMetric
     events:
-      - http:
-          path: datasets/{datasetId}/metrics/{metricId}
+      - httpApi:
+          path: /datasets/{datasetId}/metrics/{metricId}
           method: get
-          cors: true
+          authorizer:
+            name: authorizer
   login:
     handler: api/handlers.login
     events:
-      - http:
-          path: login
+      - httpApi:
+          path: /login
           method: post
-          cors: true
+  authorizer:
+    handler: api/handlers.authorizer
+    description: Lambda for the authorizer function
 
 resources:
   Resources:

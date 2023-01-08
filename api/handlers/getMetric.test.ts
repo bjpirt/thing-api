@@ -51,4 +51,18 @@ describe('createDataset', () => {
       body: JSON.stringify({ errors: ['Unknown server error'] })
     })
   })
+
+  it('should return a 500 error if the dataset ID is missing', async () => {
+    const result = await execute(
+      undefined as any as string,
+      'metricId',
+      '2022-01-01',
+      '2022-01-02'
+    )
+
+    expect(result).toStrictEqual({
+      statusCode: 500,
+      body: JSON.stringify({ errors: ['Unknown server error'] })
+    })
+  })
 })
