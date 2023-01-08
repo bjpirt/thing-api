@@ -28,11 +28,11 @@ Conceptually, there are two main types of object in the API:
 
 ## PUT /datasets/:datasetId
 
-## DELETE /datasets/:datasetId
+## DELETE /datasets/:datasetId
 
-## GET /datasets/:datasetId/metrics/:metricId
+## GET /datasets/:datasetId/metrics/:metricId
 
-## DELETE /datasets/:datasetId/metrics/:metricId
+## DELETE /datasets/:datasetId/metrics/:metricId
 
 # How to deploy
 
@@ -41,13 +41,15 @@ Conceptually, there are two main types of object in the API:
 The project is still working towards the MVP and there are a number of items still on the To Do list:
 
 _MVP_
-[ ] User login
-[ ] Authentication with token from login
-[ ] Keys API for datasets
-[ ] Basic user interface
+
+- [x] User login
+- [ ] Authentication with token from login
+- [ ] Keys API for datasets
+- [ ] Basic user interface
 
 _Future_
-[ ] Multiple users
-[ ] Configurable retention periods for metric data
-[ ] Downsampling of metric data with retention periods
-[ ] Time-series statistical calculations
+
+- [ ] Multiple users
+- [ ] Configurable retention periods for metric data
+- [ ] Downsampling of metric data with retention periods
+- [ ] Time-series statistical calculations

@@ -10,6 +10,9 @@ provider:
   environment:
     METRICS_TABLE: '${self:service}-${self:provider.stage}-metrics'
     DATASETS_TABLE: '${self:service}-${self:provider.stage}-datasets'
+    DEFAULT_USER: ${env:DEFAULT_USER, 'admin'}
+    DEFAULT_PASSWORD_HASH: ${env:DEFAULT_PASSWORD_HASH, '$2a$10$2eUC591MLNzy5ruk7e61xeZ4J0p9uSFmr62MkiEFEmabQ8w6NZ8Mm'}
+    JWT_SECRET: ${env:JWT_SECRET, 'Fqn5J4mgbWzk'}
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -60,6 +63,13 @@ functions:
       - http:
           path: datasets/{datasetId}/metrics/{metricId}
           method: get
+          cors: true
+  login:
+    handler: api/handlers.login
+    events:
+      - http:
+          path: login
+          method: post
           cors: true
 
 resources:
