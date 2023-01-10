@@ -1,4 +1,5 @@
 export { getDatasets } from './getDatasets'
+export { getDataset } from './getDataset'
 export { createDataset } from './createDataset'
 export { updateDataset } from './updateDataset'
 export { getMetric } from './getMetric'
