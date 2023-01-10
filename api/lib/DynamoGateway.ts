@@ -48,6 +48,13 @@ class DynamoGateway {
       .catch((e) => e)
   }
 
+  async deleteDataset(id: string): PromiseResult<void> {
+    return this.documentClient
+      .delete({ TableName: dynamoTables.datasetsTable, Key: { id } })
+      .promise()
+      .catch((e) => e)
+  }
+
   createDataset(dataset: DynamoDataset): DynamoGateway {
     this.actions.push({
       Put: { TableName: dynamoTables.datasetsTable, Item: dataset }

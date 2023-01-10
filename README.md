@@ -126,7 +126,7 @@ Some notes:
 
 ## DELETE /datasets/:datasetId
 
-TODO
+Make a `DELETE` request to `/datasets/:datasetId` to delete an individual dataset.
 
 ## GET /datasets/:datasetId/metrics/:metricId
 
