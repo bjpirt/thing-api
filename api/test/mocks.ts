@@ -21,6 +21,7 @@ export const mockDynamoDataset = (
 ): DynamoDataset => ({
   ...mockCreateDataset(),
   id: uid(),
+  user: 'testUser',
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
   ...dataset

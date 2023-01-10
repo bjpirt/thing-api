@@ -1,10 +1,6 @@
 import { mockCreateDataset } from 'api/test/mocks'
-import {
-  APIGatewayProxyEventV2,
-  APIGatewayProxyResultV2,
-  Callback,
-  Context
-} from 'aws-lambda'
+import { CustomAPIGatewayProxyEventV2 } from 'api/types/ApiHandler'
+import { APIGatewayProxyResultV2, Callback, Context } from 'aws-lambda'
 import createDynamoConfig from '../lib/createDynamoConfig'
 import { clearDynamoTable, getAll } from '../test/dynamoHelpers'
 import { CreateDataset } from '../types/Dataset'
@@ -16,7 +12,10 @@ const execute = (
   dataset: CreateDataset
 ): void | Promise<APIGatewayProxyResultV2> =>
   createDataset(
-    { body: JSON.stringify(dataset) } as APIGatewayProxyEventV2,
+    {
+      body: JSON.stringify(dataset),
+      requestContext: { authorizer: { user: 'test' } }
+    } as CustomAPIGatewayProxyEventV2,
     {} as Context,
     {} as Callback<APIGatewayProxyResultV2>
   )
@@ -47,7 +46,10 @@ describe('createDataset', () => {
 
   it("should return an error if the json won't parse", async () => {
     const result = await createDataset(
-      { body: 'notJson' } as APIGatewayProxyEventV2,
+      {
+        body: 'notJson',
+        requestContext: { authorizer: { user: 'test' } }
+      } as CustomAPIGatewayProxyEventV2,
       {} as Context,
       {} as Callback<APIGatewayProxyResultV2>
     )
@@ -59,7 +61,9 @@ describe('createDataset', () => {
 
   it('should return an error if the body is missing', async () => {
     const result = await createDataset(
-      {} as APIGatewayProxyEventV2,
+      {
+        requestContext: { authorizer: { user: 'test' } }
+      } as CustomAPIGatewayProxyEventV2,
       {} as Context,
       {} as Callback<APIGatewayProxyResultV2>
     )

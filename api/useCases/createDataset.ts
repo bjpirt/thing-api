@@ -1,17 +1,19 @@
 import ShortUniqueId from 'short-unique-id'
 import DynamoGateway from '../lib/DynamoGateway'
-import { DynamoDataset, CreateDataset, OutputDataset } from '../types/Dataset'
+import { DynamoDataset, CreateDataset } from '../types/Dataset'
 import { isError, PromiseResult } from '../types/Result'
 
 const uid = new ShortUniqueId({ length: 10 })
 
 const createDataset = async (
+  user: string,
   dataset: CreateDataset,
   gateway: DynamoGateway
-): PromiseResult<OutputDataset> => {
+): PromiseResult<DynamoDataset> => {
   const now = new Date().toISOString()
   const dynamoData: DynamoDataset = {
     id: uid(),
+    user,
     createdAt: now,
     updatedAt: now,
     ...dataset
@@ -20,7 +22,7 @@ const createDataset = async (
   if (isError(result)) {
     return result
   }
-  return dynamoData as OutputDataset
+  return dynamoData
 }
 
 export default createDataset
