@@ -53,6 +53,14 @@ custom:
       migrate: true
 
 functions:
+  getDatasets:
+    handler: api/handlers.getDatasets
+    events:
+      - httpApi:
+          path: /datasets
+          method: get
+          authorizer:
+            name: authorizer
   createDataset:
     handler: api/handlers.createDataset
     events:
@@ -96,9 +104,25 @@ resources:
         AttributeDefinitions:
           - AttributeName: id
             AttributeType: S
+          - AttributeName: user
+            AttributeType: S
+          - AttributeName: createdAt
+            AttributeType: S
         KeySchema:
           - AttributeName: id
             KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: userDatasetIndex
+            KeySchema:
+              - AttributeName: user
+                KeyType: HASH
+              - AttributeName: createdAt
+                KeyType: RANGE
+            Projection:
+              ProjectionType: 'ALL'
+            ProvisionedThroughput:
+              ReadCapacityUnits: 1
+              WriteCapacityUnits: 1
         BillingMode: PROVISIONED
         ProvisionedThroughput:
           ReadCapacityUnits: 1

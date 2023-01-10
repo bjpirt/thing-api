@@ -20,6 +20,24 @@ class DynamoGateway {
 
   constructor(private documentClient: DocumentClient) {}
 
+  async getDatasets(user?: string): PromiseResult<DynamoDataset[]> {
+    return this.documentClient
+      .query({
+        TableName: dynamoTables.datasetsTable,
+        IndexName: 'userDatasetIndex',
+        KeyConditionExpression: '#user = :user',
+        ExpressionAttributeValues: {
+          ':user': user
+        },
+        ExpressionAttributeNames: {
+          '#user': 'user'
+        }
+      })
+      .promise()
+      .then((result) => (result.Items ? result.Items : []))
+      .catch((e) => e)
+  }
+
   async getDataset(id: string): PromiseResult<DynamoDataset> {
     return this.documentClient
       .get({ TableName: dynamoTables.datasetsTable, Key: { id } })

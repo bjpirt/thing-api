@@ -32,8 +32,8 @@ export type UpdateMetric = z.infer<typeof createMetricSchema>
 export type UpdateDataset = z.infer<typeof updateDatasetSchema>
 
 export type OutputMetric = CreateMetric & {
-  time: string
-  value: number
+  time?: string
+  value?: number
 }
 
 export type OutputDataset = CreateDataset & {
@@ -50,6 +50,9 @@ export type DynamoDataset = CreateDataset & {
   user: string
   createdAt: string
   updatedAt: string
+  metrics: {
+    [k: string]: OutputMetric
+  }
 }
 
 export type DynamoUpdateDataset = UpdateDataset & {

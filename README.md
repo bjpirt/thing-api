@@ -22,7 +22,34 @@ Conceptually, there are two main types of object in the API:
 
 ## GET /datasets
 
-TODO
+Make a `GET` request to `/datasets` to retrieve all of the datasets for the user in the auth token:
+
+```JSON
+
+{
+  "datasets": [
+    {
+      "name": "Name of Dataset 1",
+      "metrics": {
+        "metricOne": {
+          "description": "Longer description for metric one",
+          "unit": "W"
+        }
+      }
+    },
+    {
+      "name": "Name of Dataset 2",
+      "metrics": {
+        "metricOne": {
+          "description": "Longer description for metric one",
+          "unit": "W"
+        }
+      }
+    }
+  ]
+}
+
+```
 
 ## POST /datasets
 
