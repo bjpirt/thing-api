@@ -12,7 +12,7 @@ const documentClient = createDocumentClient(process.env)
 const dynamoGateway = new DynamoGateway(documentClient)
 
 export const createDataset: ApiHandler = async (event) => {
-  const user = event.requestContext.authorizer?.user
+  const user = event.requestContext?.authorizer?.user
   if (!user) {
     return send401()
   }
