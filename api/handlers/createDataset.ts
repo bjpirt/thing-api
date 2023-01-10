@@ -1,7 +1,7 @@
 import createDocumentClient from '../lib/createDocumentClient'
 import DynamoGateway from '../lib/DynamoGateway'
 import formatZodErrors from '../lib/formatZodErrors'
-import { send201, send400, send500 } from '../lib/httpResponses'
+import { send201, send400, send401, send500 } from '../lib/httpResponses'
 import logger from '../lib/logger'
 import ApiHandler from '../types/ApiHandler'
 import { createDatasetSchema } from '../types/Dataset'
@@ -12,6 +12,10 @@ const documentClient = createDocumentClient(process.env)
 const dynamoGateway = new DynamoGateway(documentClient)
 
 export const createDataset: ApiHandler = async (event) => {
+  const user = event.requestContext.authorizer?.user
+  if (!user) {
+    return send401()
+  }
   if (!event.body) {
     return send400({ errors: ['Body is missing'] })
   }
@@ -25,6 +29,7 @@ export const createDataset: ApiHandler = async (event) => {
     }
 
     const createResult = await createDatasetUseCase(
+      user,
       inputData.data,
       dynamoGateway
     )

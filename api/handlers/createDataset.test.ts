@@ -13,12 +13,8 @@ jest.mock('aws-sdk', () => {
 })
 
 import { mockCreateDataset } from 'api/test/mocks'
-import {
-  APIGatewayProxyEventV2,
-  APIGatewayProxyResultV2,
-  Callback,
-  Context
-} from 'aws-lambda'
+import { CustomAPIGatewayProxyEventV2 } from 'api/types/ApiHandler'
+import { APIGatewayProxyResultV2, Callback, Context } from 'aws-lambda'
 import { CreateDataset } from '../types/Dataset'
 import { createDataset } from './createDataset'
 
@@ -26,7 +22,10 @@ const execute = (
   dataset: CreateDataset
 ): void | Promise<APIGatewayProxyResultV2> =>
   createDataset(
-    { body: JSON.stringify(dataset) } as APIGatewayProxyEventV2,
+    {
+      body: JSON.stringify(dataset),
+      requestContext: { authorizer: { user: 'test' } }
+    } as CustomAPIGatewayProxyEventV2,
     {} as Context,
     {} as Callback<APIGatewayProxyResultV2>
   )

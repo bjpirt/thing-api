@@ -47,6 +47,7 @@ export type OutputDataset = CreateDataset & {
 
 export type DynamoDataset = CreateDataset & {
   id: string
+  user: string
   createdAt: string
   updatedAt: string
 }

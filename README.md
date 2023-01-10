@@ -167,11 +167,8 @@ _MVP_
 
 _Future_
 
+- [ ] Alerts / webhooks
 - [ ] Multiple users
 - [ ] Configurable retention periods for metric data
 - [ ] Downsampling of metric data with retention periods
 - [ ] Time-series statistical calculations
-
-```
-
-```
