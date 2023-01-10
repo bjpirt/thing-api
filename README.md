@@ -29,6 +29,7 @@ Make a `GET` request to `/datasets` to retrieve all of the datasets for the user
 {
   "datasets": [
     {
+      "id": "ah6dmn8SNp",
       "name": "Name of Dataset 1",
       "metrics": {
         "metricOne": {
@@ -38,6 +39,7 @@ Make a `GET` request to `/datasets` to retrieve all of the datasets for the user
       }
     },
     {
+      "id": "fpqlM7FspJ",
       "name": "Name of Dataset 2",
       "metrics": {
         "metricOne": {
@@ -78,7 +80,20 @@ You will receive a `201` status code if the request is successful and a `Locatio
 
 ## GET /datasets/:datasetId
 
-TODO
+Make a `GET` request to `/datasets/:datasetId` to retrieve an individual dataset:
+
+```JSON
+{
+  "id": "ah6dmn8SNp",
+  "name": "Name of Dataset 1",
+  "metrics": {
+    "metricOne": {
+      "description": "Longer description for metric one",
+      "unit": "W"
+    }
+  }
+}
+```
 
 ## PUT /datasets/:datasetId
 

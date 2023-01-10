@@ -61,6 +61,14 @@ functions:
           method: get
           authorizer:
             name: authorizer
+  getDataset:
+    handler: api/handlers.getDataset
+    events:
+      - httpApi:
+          path: /datasets/{datasetId}
+          method: get
+          authorizer:
+            name: authorizer
   createDataset:
     handler: api/handlers.createDataset
     events:
