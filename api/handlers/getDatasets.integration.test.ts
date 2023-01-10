@@ -22,7 +22,7 @@ const execute = (user: string): void | Promise<APIGatewayProxyResultV2> =>
     {} as Callback<APIGatewayProxyResultV2>
   )
 
-describe('createDataset', () => {
+describe('getDatasets', () => {
   beforeEach(async () => {
     await clearDynamoTable(dynamoTables.datasetsTable)
   })

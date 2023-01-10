@@ -69,6 +69,14 @@ functions:
           method: get
           authorizer:
             name: authorizer
+  deleteDataset:
+    handler: api/handlers.deleteDataset
+    events:
+      - httpApi:
+          path: /datasets/{datasetId}
+          method: delete
+          authorizer:
+            name: authorizer
   createDataset:
     handler: api/handlers.createDataset
     events:
