@@ -167,7 +167,7 @@ returns
 
 ## DELETE /datasets/:datasetId/metrics/:metricId
 
-TODO
+Make a `DELETE` request to `/datasets/:datasetId/metrics/:metricId` to delete an individual metric from a dataset. Note: the metric data is not currently removed from Dynamo.
 
 ## POST /login
 
@@ -210,6 +210,7 @@ _MVP_
 _Future_
 
 - [ ] Alerts / webhooks
+- [ ] MQTT / AWS IoT integration
 - [ ] Multiple users
 - [ ] Configurable retention periods for metric data
 - [ ] Downsampling of metric data with retention periods
