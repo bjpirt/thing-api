@@ -62,6 +62,22 @@ class DynamoGateway {
     return this
   }
 
+  deleteMetric(datasetId: string, metricId: string): DynamoGateway {
+    const action: DocumentClient.TransactWriteItem = {
+      Update: {
+        TableName: dynamoTables.datasetsTable,
+        Key: { id: datasetId },
+        UpdateExpression: `REMOVE #metrics.#metricId`,
+        ExpressionAttributeNames: {
+          '#metrics': 'metrics',
+          '#metricId': metricId
+        }
+      }
+    }
+    this.actions.push(action)
+    return this
+  }
+
   updateDataset(
     dataset: DynamoUpdateDataset,
     existingDataset: DynamoDataset
@@ -124,10 +140,12 @@ class DynamoGateway {
   }
 
   async execute(): PromiseResult<void> {
-    return this.documentClient
+    const result = await this.documentClient
       .transactWrite({ TransactItems: this.actions })
       .promise()
       .catch((e) => e)
+    this.actions = []
+    return result
   }
 
   getMetricRange(

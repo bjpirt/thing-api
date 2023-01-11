@@ -101,6 +101,14 @@ functions:
           method: get
           authorizer:
             name: authorizer
+  deleteMetric:
+    handler: api/handlers.deleteMetric
+    events:
+      - httpApi:
+          path: /datasets/{datasetId}/metrics/{metricId}
+          method: delete
+          authorizer:
+            name: authorizer
   login:
     handler: api/handlers.login
     events:
