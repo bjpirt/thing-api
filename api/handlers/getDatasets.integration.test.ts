@@ -48,4 +48,14 @@ describe('getDatasets', () => {
     expect(datasetIds).toContain(dataset1.id)
     expect(datasetIds).toContain(dataset2.id)
   })
+
+  it('should return an empty array if there are no datasets', async () => {
+    const result = (await execute('user')) as APIGatewayProxyStructuredResultV2
+
+    const { statusCode, body } = result
+    expect(statusCode).toBe(200)
+
+    const datasets = JSON.parse(body!) as { datasets: OutputDataset[] }
+    expect(datasets.datasets).toHaveLength(0)
+  })
 })

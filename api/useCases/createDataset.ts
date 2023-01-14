@@ -16,6 +16,7 @@ const createDataset = async (
     user,
     createdAt: now,
     updatedAt: now,
+    keys: {},
     ...dataset
   }
   const result = await gateway.createDataset(dynamoData).execute()

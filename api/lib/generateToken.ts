@@ -1,20 +1,12 @@
+import { AuthToken } from 'api/types/AuthToken'
 import { Result } from 'api/types/Result'
 import jwt from 'jsonwebtoken'
 import config from './config'
 
-type GenerateTokenOptions = {
-  user?: string
-  dataset?: string
-}
+const generateToken = (payload: AuthToken): Result<string> => {
+  const jwtConfig = payload.scope === 'user' ? { expiresIn: '1d' } : {}
 
-const generateToken = (options: GenerateTokenOptions): Result<string> => {
-  if (options.user) {
-    const payload = { scope: 'user', user: options.user }
-    return jwt.sign(payload, config.jwtSecret, {
-      expiresIn: '1d'
-    })
-  }
-  return new Error('Invalid configuration')
+  return jwt.sign(payload, config.jwtSecret, jwtConfig)
 }
 
 export default generateToken

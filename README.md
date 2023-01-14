@@ -169,6 +169,22 @@ returns
 
 Make a `DELETE` request to `/datasets/:datasetId/metrics/:metricId` to delete an individual metric from a dataset. Note: the metric data is not currently removed from Dynamo.
 
+## POST /datasets/:datasetId/tokens
+
+This creates an authentication token that can be used to perform actions on only this dataset. It is possible to configure this token to only allow certain methods (`GET`, `POST`, `PUT`,`DELETE`) or all methods (`*`). These token do not expire because they are designed to be long lived and used on devices. It is possible to expire a token by deleting it.
+
+Make a `POST` request to `/datasets/:datasetId/tokens` with the following JSON data structure:
+
+```JSON
+{
+  "name": "Human readable token name so you can remember what it's for",
+  "methods": [
+    "GET",
+    "PUT"
+  ]
+}
+```
+
 ## POST /login
 
 This is used to log in with your user name and password and retrieve a token to use with the rest of the API. The current implementation is single user and this is configured via environment variables.
