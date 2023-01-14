@@ -64,14 +64,22 @@ class DynamoGateway {
   }
 
   deleteMetric(datasetId: string, metricId: string): DynamoGateway {
+    return this.deleteDatasetSubKey(datasetId, 'metrics', metricId)
+  }
+
+  deleteDatasetToken(datasetId: string, tokenId: string): DynamoGateway {
+    return this.deleteDatasetSubKey(datasetId, 'tokens', tokenId)
+  }
+
+  deleteDatasetSubKey(datasetId: string, parentKey: string, childKey: string) {
     const action: DocumentClient.TransactWriteItem = {
       Update: {
         TableName: dynamoTables.datasetsTable,
         Key: { id: datasetId },
-        UpdateExpression: `REMOVE #metrics.#metricId`,
+        UpdateExpression: `REMOVE #parentKey.#childKey`,
         ExpressionAttributeNames: {
-          '#metrics': 'metrics',
-          '#metricId': metricId
+          '#parentKey': parentKey,
+          '#childKey': childKey
         }
       }
     }

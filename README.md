@@ -218,7 +218,7 @@ Note this does not return the actual auth token, just a reference to it so that 
 
 ## DELETE /datasets/:datasetId/tokens/:tokenId
 
-TODO
+Make a `DELETE` request to `/datasets/:datasetId/tokens/:tokenId` to delete (and therby revoke) a token to it can no longer be used to make requests
 
 ## POST /login
 
@@ -255,7 +255,7 @@ _MVP_
 
 - [x] User login
 - [x] Authentication with token from login
-- [ ] Tokens API for datasets
+- [x] Tokens API for datasets
 - [ ] Basic user interface
 
 _Future_
