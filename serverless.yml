@@ -120,6 +120,14 @@ functions:
           method: post
           authorizer:
             name: authorizer
+  getDatasetTokens:
+    handler: api/handlers.getDatasetTokens
+    events:
+      - httpApi:
+          path: /datasets/{datasetId}/tokens
+          method: get
+          authorizer:
+            name: authorizer
   login:
     handler: api/handlers.login
     events:

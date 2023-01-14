@@ -40,3 +40,7 @@ export type CreateDatasetToken = z.infer<typeof createDatasetTokenSchema>
 export type DynamoDatasetToken = CreateDatasetToken & {
   createdAt: string
 }
+
+export type OutputDatasetToken = DynamoDatasetToken & {
+  id: string
+}
