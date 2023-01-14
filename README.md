@@ -185,6 +185,16 @@ Make a `POST` request to `/datasets/:datasetId/tokens` with the following JSON d
 }
 ```
 
+It returns an authentication token to use with the following JSON response:
+
+```JSON
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzY29wZSI6InVzZXIiLCJ1c2VyIjoiYWRtaW4iLCJpYXQiOjE2NzMxOTM1NzksImV4cCI6MTY3MzI3OTk3OX0.D35omt0ZrKBiIVe-_GPzFAxK6Mq7PhLCiHLlv_WMN7E"
+}
+```
+
+Note that for security reasons it is not possible to retrieve these tokens again in the future.
+
 ## POST /login
 
 This is used to log in with your user name and password and retrieve a token to use with the rest of the API. The current implementation is single user and this is configured via environment variables.
@@ -220,7 +230,7 @@ _MVP_
 
 - [x] User login
 - [x] Authentication with token from login
-- [ ] Keys API for datasets
+- [ ] Tokens API for datasets
 - [ ] Basic user interface
 
 _Future_
