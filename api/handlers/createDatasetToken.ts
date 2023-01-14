@@ -10,7 +10,7 @@ import {
 } from '../lib/httpResponses'
 import logger from '../lib/logger'
 import ApiHandler from '../types/ApiHandler'
-import { createDatasetTokenSchema } from '../types/DatasetKey'
+import { createDatasetTokenSchema } from '../types/DatasetToken'
 import { isError } from '../types/Result'
 import { default as createDatasetTokenUseCase } from '../useCases/createDatasetToken'
 

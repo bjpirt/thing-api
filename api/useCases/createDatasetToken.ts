@@ -1,8 +1,8 @@
 import generateToken from 'api/lib/generateToken'
-import { DynamoDatasetKey } from 'api/types/DatasetKey'
+import { DynamoDatasetToken } from 'api/types/DatasetToken'
 import ShortUniqueId from 'short-unique-id'
 import DynamoGateway from '../lib/DynamoGateway'
-import { CreateDatasetToken } from '../types/DatasetKey'
+import { CreateDatasetToken } from '../types/DatasetToken'
 import { isError, PromiseResult } from '../types/Result'
 
 const uid = new ShortUniqueId({ length: 10 })
@@ -10,7 +10,7 @@ const uid = new ShortUniqueId({ length: 10 })
 const createDatasetToken = async (
   user: string,
   datasetId: string,
-  datasetKey: CreateDatasetToken,
+  datasetToken: CreateDatasetToken,
   gateway: DynamoGateway
 ): PromiseResult<string> => {
   const existingDataset = await gateway.getDataset(datasetId)
@@ -23,9 +23,9 @@ const createDatasetToken = async (
 
   const tokenId = uid()
 
-  const dynamoData: DynamoDatasetKey = {
+  const dynamoData: DynamoDatasetToken = {
     createdAt: new Date().toISOString(),
-    ...datasetKey
+    ...datasetToken
   }
   const result = await gateway
     .createDatasetToken(datasetId, tokenId, dynamoData)
@@ -38,7 +38,7 @@ const createDatasetToken = async (
     scope: 'dataset',
     id: datasetId,
     tokenId: tokenId,
-    methods: datasetKey.methods
+    methods: datasetToken.methods
   })
 }
 

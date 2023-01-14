@@ -195,6 +195,14 @@ It returns an authentication token to use with the following JSON response:
 
 Note that for security reasons it is not possible to retrieve these tokens again in the future.
 
+## GET /datasets/:datasetId/tokens
+
+TODO
+
+## DELETE /datasets/:datasetId/tokens/:tokenId
+
+TODO
+
 ## POST /login
 
 This is used to log in with your user name and password and retrieve a token to use with the rest of the API. The current implementation is single user and this is configured via environment variables.
