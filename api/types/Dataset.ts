@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { DynamoDatasetKey } from './DatasetKey'
 
 const metricIdSchema = z.string().regex(/^[a-zA-Z0-9\-_]+$/, {
   message: 'Metric id must be alphanumeric (a-z, A-Z, 0-9, -, _) with no spaces'
@@ -51,7 +52,10 @@ export type DynamoDataset = CreateDataset & {
   createdAt: string
   updatedAt: string
   metrics: {
-    [k: string]: OutputMetric
+    [id: string]: OutputMetric
+  }
+  keys: {
+    [id: string]: DynamoDatasetKey
   }
 }
 

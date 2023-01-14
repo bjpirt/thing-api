@@ -1,3 +1,4 @@
+import { DynamoDatasetKey } from 'api/types/DatasetKey'
 import { DocumentClient } from 'aws-sdk/clients/dynamodb'
 import {
   DynamoDataset,
@@ -169,6 +170,23 @@ class DynamoGateway {
       .promise()
       .then((result) => (result.Items as DynamoMetricValue[]) ?? [])
       .catch((e) => e)
+  }
+
+  createDatasetToken(
+    datasetId: string,
+    keyId: string,
+    datasetKey: DynamoDatasetKey
+  ): DynamoGateway {
+    this.actions.push({
+      Update: {
+        TableName: dynamoTables.datasetsTable,
+        Key: { id: datasetId },
+        UpdateExpression: `SET #keys.#keyId = :datasetKey`,
+        ExpressionAttributeValues: { ':datasetKey': datasetKey },
+        ExpressionAttributeNames: { '#keys': 'keys', '#keyId': keyId }
+      }
+    })
+    return this
   }
 }
 

@@ -23,7 +23,7 @@ export const login: ApiHandler = async (event) => {
     return loginSuccess
       ? send200(
           JSON.stringify({
-            token: generateToken({ user: inputData.data.user })
+            token: generateToken({ scope: 'user', user: inputData.data.user })
           })
         )
       : send401()

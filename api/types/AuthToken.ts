@@ -1,4 +1,4 @@
-export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | '*'
+import { AllHttpMethods } from './DatasetKey'
 
 export type UserAuthToken = {
   scope: 'user'
@@ -7,8 +7,9 @@ export type UserAuthToken = {
 
 export type DatasetAuthToken = {
   scope: 'dataset'
-  datasetId: string
-  methods: HttpMethod[]
+  id: string
+  tokenId: string
+  methods: AllHttpMethods[]
 }
 
 export type AuthToken = UserAuthToken | DatasetAuthToken
