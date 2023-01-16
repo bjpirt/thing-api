@@ -199,7 +199,7 @@ Note that for security reasons it is not possible to retrieve these tokens again
 
 Make a `GET` request to `/datasets/:datasetid/tokens` to retrive the tokens for that dataset in the following format:
 
-````JSON
+```JSON
 {
   "tokens": [
     {
@@ -213,6 +213,7 @@ Make a `GET` request to `/datasets/:datasetid/tokens` to retrive the tokens for 
     }
   ]
 }
+```
 
 Note this does not return the actual auth token, just a reference to it so that you can delete it if it needs revoking.
 
@@ -233,7 +234,7 @@ Make a `POST` request to `/login` with the following JSON:
   "password": "password"
 }
 
-````
+```
 
 If successful you will receive a token to use for the API (valid for one day) as follows:
 
