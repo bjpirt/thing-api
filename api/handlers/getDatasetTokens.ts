@@ -1,3 +1,4 @@
+import { getUser } from 'api/lib/getAuth'
 import createDocumentClient from '../lib/createDocumentClient'
 import DynamoGateway from '../lib/DynamoGateway'
 import { send200, send401, send404, send500 } from '../lib/httpResponses'
@@ -11,16 +12,20 @@ const dynamoGateway = new DynamoGateway(documentClient)
 
 export const getDatasetTokens: ApiHandler = async (event) => {
   const datasetId = event.pathParameters?.datasetId
-  const user = event.requestContext?.authorizer?.user
+  const authUser = getUser(event)
 
-  if (!user) {
+  if (!authUser) {
     return send401()
   }
   if (!datasetId) {
     return send500()
   }
 
-  const tokens = await getDatasetTokensUseCase(user, datasetId, dynamoGateway)
+  const tokens = await getDatasetTokensUseCase(
+    authUser,
+    datasetId,
+    dynamoGateway
+  )
   if (isError(tokens)) {
     if (tokens.message === 'Dataset not found') {
       return send404()

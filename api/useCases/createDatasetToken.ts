@@ -36,7 +36,7 @@ const createDatasetToken = async (
 
   return generateToken({
     scope: 'dataset',
-    id: datasetId,
+    datasetId,
     tokenId: tokenId,
     methods: datasetToken.methods
   })

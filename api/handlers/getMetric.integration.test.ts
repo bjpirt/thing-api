@@ -23,12 +23,14 @@ const execute = (
   datasetId: string,
   metricId: string,
   start?: string,
-  end?: string
+  end?: string,
+  user = 'testUser'
 ): Promise<APIGatewayProxyResultV2> =>
   getMetric(
     {
       pathParameters: { datasetId, metricId },
-      queryStringParameters: { start, end }
+      queryStringParameters: { start, end },
+      requestContext: { authorizer: { user } }
     } as unknown as APIGatewayProxyEventV2,
     {} as Context,
     {} as Callback<APIGatewayProxyResultV2>
@@ -68,6 +70,23 @@ describe('createDataset', () => {
       time: '2023-01-01T01:36:00.000Z',
       value: 25
     })
+  })
+
+  it('should retrieve metrics with a dataset token', async () => {
+    const result = await getMetric(
+      {
+        pathParameters: { datasetId: dataset.id, metricId: 'metricOne' },
+        queryStringParameters: {
+          start: '2023-01-01T00:00:00Z',
+          end: '2023-01-01T02:00:00Z'
+        },
+        requestContext: { authorizer: { datasetId: dataset.id } }
+      } as unknown as APIGatewayProxyEventV2,
+      {} as Context,
+      {} as Callback<APIGatewayProxyResultV2>
+    )
+
+    expect(result).toHaveProperty('statusCode', 200)
   })
 
   it('should filter metrics by time', async () => {
@@ -161,5 +180,27 @@ describe('createDataset', () => {
       time: '2023-01-01T01:08:00.000Z',
       value: 18
     })
+  })
+
+  it('should return a 404 if the metric does not exist', async () => {
+    const result = await execute(
+      dataset.id,
+      'badMetric',
+      '2023-01-01T00:00:00Z',
+      '2023-01-01T02:00:00Z'
+    )
+    expect(result).toStrictEqual({ statusCode: 404 })
+  })
+
+  it('should return a 404 if the user does not match', async () => {
+    const result = await execute(
+      dataset.id,
+      'metricOne',
+      '2023-01-01T00:00:00Z',
+      '2023-01-01T02:00:00Z',
+      'wrongUser'
+    )
+
+    expect(result).toStrictEqual({ statusCode: 404 })
   })
 })

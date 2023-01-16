@@ -17,7 +17,7 @@ import { APIGatewayProxyResultV2, Callback, Context } from 'aws-lambda'
 import { getDataset } from './getDataset'
 
 describe('getDataset', () => {
-  it('should return a 401 error if the user is not set', async () => {
+  it('should return a 401 error if the auth data is not set', async () => {
     const result = await getDataset(
       {} as CustomAPIGatewayProxyEventV2,
       {} as Context,

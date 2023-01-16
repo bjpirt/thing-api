@@ -7,7 +7,7 @@ export type UserAuthToken = {
 
 export type DatasetAuthToken = {
   scope: 'dataset'
-  id: string
+  datasetId: string
   tokenId: string
   methods: AllHttpMethods[]
 }

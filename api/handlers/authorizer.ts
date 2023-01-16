@@ -1,5 +1,6 @@
-import AuthContext from 'api/types/AuthContext'
+import { AuthContext } from 'api/types/AuthContext'
 import { AuthToken } from 'api/types/AuthToken'
+import { HttpMethods } from 'api/types/DatasetToken'
 import {
   APIGatewayRequestAuthorizerEventV2,
   APIGatewaySimpleAuthorizerWithContextResult
@@ -30,27 +31,54 @@ const decodeToken = (token: string): AuthToken | false => {
   }
 }
 
-const requestAllowed = (tokenPayload: AuthToken) => {
-  return tokenPayload.scope === 'user'
+const requestAllowed = (
+  tokenPayload: AuthToken,
+  event: APIGatewayRequestAuthorizerEventV2
+) => {
+  if (tokenPayload.scope === 'user') {
+    return true
+  }
+  if (tokenPayload.scope === 'dataset') {
+    const datasetId = event.pathParameters?.datasetId
+    if (
+      event.rawPath.startsWith(`/datasets/${datasetId}`) &&
+      !event.rawPath.includes('/tokens')
+    ) {
+      if (tokenPayload.methods[0] === '*') {
+        return true
+      }
+      const method = event.requestContext.http.method.toUpperCase()
+      if (tokenPayload.methods.includes(method as HttpMethods)) {
+        return true
+      }
+    }
+  }
+  return false
 }
 
 export const authorizer = async (
   event: APIGatewayRequestAuthorizerEventV2
-): Promise<APIGatewaySimpleAuthorizerWithContextResult<AuthContext>> => {
+): Promise<
+  APIGatewaySimpleAuthorizerWithContextResult<
+    AuthContext | Record<string, never>
+  >
+> => {
   const decodedToken = extractTokenFromHeaders(event)
-  if (
-    decodedToken &&
-    requestAllowed(decodedToken) &&
-    decodedToken.scope === 'user'
-  ) {
+
+  if (decodedToken && requestAllowed(decodedToken, event)) {
+    const context =
+      decodedToken.scope === 'user'
+        ? { user: decodedToken.user }
+        : { datasetId: decodedToken.datasetId }
+
     return {
       isAuthorized: true,
-      context: { user: decodedToken.user }
+      context
     }
   }
 
   return {
     isAuthorized: false,
-    context: { user: null }
+    context: {}
   }
 }

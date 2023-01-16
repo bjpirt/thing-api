@@ -1,3 +1,4 @@
+import { getUser } from 'api/lib/getAuth'
 import createDocumentClient from '../lib/createDocumentClient'
 import DynamoGateway from '../lib/DynamoGateway'
 import formatZodErrors from '../lib/formatZodErrors'
@@ -18,12 +19,12 @@ const documentClient = createDocumentClient(process.env)
 const dynamoGateway = new DynamoGateway(documentClient)
 
 export const createDatasetToken: ApiHandler = async (event) => {
-  const user = event.requestContext?.authorizer?.user
+  const authUser = getUser(event)
   const datasetId = event.pathParameters?.datasetId
   if (!datasetId) {
     return send500()
   }
-  if (!user) {
+  if (!authUser) {
     return send401()
   }
   if (!event.body) {
@@ -37,7 +38,7 @@ export const createDatasetToken: ApiHandler = async (event) => {
     }
 
     const createResult = await createDatasetTokenUseCase(
-      user,
+      authUser,
       datasetId,
       inputData.data,
       dynamoGateway

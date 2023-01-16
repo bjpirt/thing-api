@@ -1,3 +1,4 @@
+import { getUser } from 'api/lib/getAuth'
 import createDocumentClient from '../lib/createDocumentClient'
 import DynamoGateway from '../lib/DynamoGateway'
 import { send200, send401, send500 } from '../lib/httpResponses'
@@ -10,12 +11,12 @@ const documentClient = createDocumentClient(process.env)
 const dynamoGateway = new DynamoGateway(documentClient)
 
 export const getDatasets: ApiHandler = async (event) => {
-  const user = event.requestContext?.authorizer?.user
-  if (!user) {
+  const authUser = getUser(event)
+  if (!authUser) {
     return send401()
   }
 
-  const datasets = await getDatasetsUseCase(user, dynamoGateway)
+  const datasets = await getDatasetsUseCase(authUser, dynamoGateway)
   if (isError(datasets)) {
     logger.error(datasets)
     return send500()

@@ -46,6 +46,24 @@ describe('deleteDataset', () => {
     expect(afterCount).toHaveLength(0)
   })
 
+  it('should delete the dataset with a valid dataset auth token', async () => {
+    const dataset = mockDynamoDataset()
+    await createItem(dynamoTables.datasetsTable, dataset)
+    const beforeCount = await getAll(dynamoTables.datasetsTable)
+    expect(beforeCount).toHaveLength(1)
+
+    const result = await deleteDataset(
+      {
+        pathParameters: { datasetId: dataset.id },
+        requestContext: { authorizer: { datasetId: dataset.id } }
+      } as any as CustomAPIGatewayProxyEventV2,
+      {} as Context,
+      {} as Callback<APIGatewayProxyResultV2>
+    )
+
+    expect(result).toHaveProperty('statusCode', 204)
+  })
+
   it('should return a 404 if the dataset does not exist', async () => {
     const result = (await execute(
       'foo',

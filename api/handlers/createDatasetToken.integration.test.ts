@@ -51,7 +51,7 @@ describe('createDataset', () => {
     const token = JSON.parse((result as any).body).token
     const payload = jwt.verify(token, jwtSecret)
     expect(payload).toHaveProperty('scope', 'dataset')
-    expect(payload).toHaveProperty('id', dataset.id)
+    expect(payload).toHaveProperty('datasetId', dataset.id)
     expect(payload).toHaveProperty('methods', ['GET', 'PUT'])
     expect(payload).not.toHaveProperty('exp')
 

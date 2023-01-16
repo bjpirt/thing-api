@@ -5,7 +5,7 @@ import {
   Callback,
   Context
 } from 'aws-lambda'
-import AuthContext from './AuthContext'
+import { AuthContext } from './AuthContext'
 
 export type Handler<TEvent = any, TResult = any> = (
   event: TEvent,
