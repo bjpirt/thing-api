@@ -6,11 +6,15 @@ import { isError, PromiseResult } from '../types/Result'
 const updateDataset = async (
   datasetId: string,
   dataset: UpdateDataset,
-  gateway: DynamoGateway
+  gateway: DynamoGateway,
+  authUser?: string
 ): PromiseResult<void> => {
   const existingDataset = await gateway.getDataset(datasetId)
   if (isError(existingDataset)) {
     return existingDataset
+  }
+  if (authUser && authUser !== existingDataset.user) {
+    return new Error('Dataset not found')
   }
 
   const dynamoUpdateDataset: DynamoUpdateDataset = {

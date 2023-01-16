@@ -1,7 +1,14 @@
+import { getDatasetId, getUser } from 'api/lib/getAuth'
 import createDocumentClient from '../lib/createDocumentClient'
 import DynamoGateway from '../lib/DynamoGateway'
 import formatZodErrors from '../lib/formatZodErrors'
-import { send204, send400, send404, send500 } from '../lib/httpResponses'
+import {
+  send204,
+  send400,
+  send401,
+  send404,
+  send500
+} from '../lib/httpResponses'
 import logger from '../lib/logger'
 import ApiHandler from '../types/ApiHandler'
 import { updateDatasetSchema } from '../types/Dataset'
@@ -12,7 +19,13 @@ const documentClient = createDocumentClient(process.env)
 const dynamoGateway = new DynamoGateway(documentClient)
 
 export const updateDataset: ApiHandler = async (event) => {
-  if (!event.pathParameters?.datasetId) {
+  const authUser = getUser(event)
+  const authDatasetId = getDatasetId(event)
+  if (!authUser && !authDatasetId) {
+    return send401()
+  }
+  const datasetId = event.pathParameters?.datasetId
+  if (!datasetId) {
     return send500()
   }
   if (!event.body) {
@@ -28,9 +41,10 @@ export const updateDataset: ApiHandler = async (event) => {
     }
 
     const createResult = await updateDatasetUseCase(
-      event.pathParameters.datasetId,
+      datasetId,
       inputData.data,
-      dynamoGateway
+      dynamoGateway,
+      authUser
     )
     if (isError(createResult)) {
       if (createResult.message === 'Dataset not found') {

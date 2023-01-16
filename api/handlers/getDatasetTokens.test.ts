@@ -1,9 +1,7 @@
-const mockDelete = jest.fn()
 const mockGet = jest.fn()
 jest.mock('aws-sdk/clients/dynamodb', () => {
   return {
     DocumentClient: jest.fn(() => ({
-      delete: () => ({ promise: mockDelete }),
       get: () => ({ promise: mockGet })
     }))
   }
@@ -14,14 +12,13 @@ jest.mock('aws-sdk', () => {
   }
 })
 
-import { mockDynamoDataset } from 'api/test/mocks'
 import { CustomAPIGatewayProxyEventV2 } from 'api/types/ApiHandler'
 import { APIGatewayProxyResultV2, Callback, Context } from 'aws-lambda'
-import { deleteDataset } from './deleteDataset'
+import { getDatasetTokens } from './getDatasetTokens'
 
-describe('deleteDataset', () => {
-  it('should return a 401 error if the auth data is not set', async () => {
-    const result = await deleteDataset(
+describe('getDatasetTokens', () => {
+  it('should return a 401 error if the user is not set', async () => {
+    const result = await getDatasetTokens(
       {} as CustomAPIGatewayProxyEventV2,
       {} as Context,
       {} as Callback<APIGatewayProxyResultV2>
@@ -33,14 +30,12 @@ describe('deleteDataset', () => {
   })
 
   it('should return a 500 error if there is a dynamo error', async () => {
-    const dataset = mockDynamoDataset()
-    mockDelete.mockRejectedValue(new Error('Unknown error'))
-    mockGet.mockResolvedValue({ Item: dataset })
+    mockGet.mockRejectedValue(new Error('Unknown error'))
 
-    const result = await deleteDataset(
+    const result = await getDatasetTokens(
       {
         pathParameters: { datasetId: 'foo' },
-        requestContext: { authorizer: { user: dataset.user } }
+        requestContext: { authorizer: { user: 'user' } }
       } as any as CustomAPIGatewayProxyEventV2,
       {} as Context,
       {} as Callback<APIGatewayProxyResultV2>
@@ -53,7 +48,7 @@ describe('deleteDataset', () => {
   })
 
   it('should return a 500 error if the datasetId is missing', async () => {
-    const result = await deleteDataset(
+    const result = await getDatasetTokens(
       {
         requestContext: { authorizer: { user: 'user' } }
       } as any as CustomAPIGatewayProxyEventV2,

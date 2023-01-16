@@ -1,24 +1,24 @@
 import DynamoGateway from 'api/lib/DynamoGateway'
 import { isError, PromiseResult } from 'api/types/Result'
 
-const deleteMetric = async (
+const deleteDatasetToken = async (
+  user: string,
   datasetId: string,
-  metricId: string,
-  gateway: DynamoGateway,
-  authUser?: string
+  tokenId: string,
+  gateway: DynamoGateway
 ): PromiseResult<void> => {
   const dataset = await gateway.getDataset(datasetId)
   if (isError(dataset)) {
     return dataset
   }
-  if (authUser && authUser !== dataset.user) {
+  if (user !== dataset.user) {
     return new Error('Dataset not found')
   }
-  if (!dataset.metrics[metricId]) {
-    return new Error('Metric not found')
+  if (!dataset.tokens[tokenId]) {
+    return new Error('Token not found')
   }
 
-  return await gateway.deleteMetric(datasetId, metricId).execute()
+  return await gateway.deleteDatasetToken(datasetId, tokenId).execute()
 }
 
-export default deleteMetric
+export default deleteDatasetToken

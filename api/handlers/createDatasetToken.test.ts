@@ -19,7 +19,7 @@ jest.mock('aws-sdk', () => {
   }
 })
 
-import { CreateDatasetToken } from 'api/types/DatasetKey'
+import { CreateDatasetToken } from 'api/types/DatasetToken'
 import {
   APIGatewayProxyEventV2,
   APIGatewayProxyResultV2,
@@ -119,7 +119,7 @@ describe('createDataset', () => {
     mockGet.mockResolvedValue({ Item: { user: defaultUser } })
 
     const result = await execute('datasetId', {
-      name: 'TestKey',
+      name: 'TestToken',
       methods: ['GET', 'PUT']
     })
 

@@ -195,6 +195,31 @@ It returns an authentication token to use with the following JSON response:
 
 Note that for security reasons it is not possible to retrieve these tokens again in the future.
 
+## GET /datasets/:datasetId/tokens
+
+Make a `GET` request to `/datasets/:datasetid/tokens` to retrive the tokens for that dataset in the following format:
+
+````JSON
+{
+  "tokens": [
+    {
+      "id": "abcde12345",
+      "name": "Human readable token name so you can remember what it's for",
+      "createdAt": "2023-01-14T21:57:03.000Z",
+      "methods": [
+        "GET",
+        "PUT"
+      ]
+    }
+  ]
+}
+
+Note this does not return the actual auth token, just a reference to it so that you can delete it if it needs revoking.
+
+## DELETE /datasets/:datasetId/tokens/:tokenId
+
+Make a `DELETE` request to `/datasets/:datasetId/tokens/:tokenId` to delete (and therby revoke) a token to it can no longer be used to make requests
+
 ## POST /login
 
 This is used to log in with your user name and password and retrieve a token to use with the rest of the API. The current implementation is single user and this is configured via environment variables.
@@ -208,7 +233,7 @@ Make a `POST` request to `/login` with the following JSON:
   "password": "password"
 }
 
-```
+````
 
 If successful you will receive a token to use for the API (valid for one day) as follows:
 
@@ -230,7 +255,7 @@ _MVP_
 
 - [x] User login
 - [x] Authentication with token from login
-- [ ] Tokens API for datasets
+- [x] Tokens API for datasets
 - [ ] Basic user interface
 
 _Future_

@@ -1,5 +1,11 @@
-type AuthContext = {
-  user: string | null
+export type UserAuthContext = {
+  user: string
 }
 
-export default AuthContext
+export type DatasetAuthContext = {
+  datasetId: string
+}
+
+export type NullAuthContext = Record<string, never>
+
+export type AuthContext = UserAuthContext | DatasetAuthContext | NullAuthContext

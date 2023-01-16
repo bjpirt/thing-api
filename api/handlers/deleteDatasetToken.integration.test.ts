@@ -1,4 +1,4 @@
-import { mockDynamoDataset } from 'api/test/mocks'
+import { mockDynamoDataset, mockToken } from 'api/test/mocks'
 import { CustomAPIGatewayProxyEventV2 } from 'api/types/ApiHandler'
 import {
   APIGatewayProxyResultV2,
@@ -8,67 +8,56 @@ import {
 } from 'aws-lambda'
 import createDynamoConfig from '../lib/createDynamoConfig'
 import { clearDynamoTable, createItem, getOne } from '../test/dynamoHelpers'
-import { deleteMetric } from './deleteMetric'
+import { deleteDatasetToken } from './deleteDatasetToken'
 
 const { dynamoTables } = createDynamoConfig(process.env)
 
 const execute = (
   datasetId: string,
-  metricId: string,
+  tokenId: string,
   user: string
 ): void | Promise<APIGatewayProxyResultV2> =>
-  deleteMetric(
+  deleteDatasetToken(
     {
-      pathParameters: { datasetId, metricId },
+      pathParameters: { datasetId, tokenId },
       requestContext: { authorizer: { user } }
     } as any as CustomAPIGatewayProxyEventV2,
     {} as Context,
     {} as Callback<APIGatewayProxyResultV2>
   )
 
-describe('deleteMetric', () => {
+describe('deleteDatasetToken', () => {
   beforeEach(async () => {
     await clearDynamoTable(dynamoTables.datasetsTable)
   })
 
   it('should delete the metric', async () => {
-    const dataset = mockDynamoDataset()
+    const dataset = mockDynamoDataset({
+      tokens: {
+        abcde12345: mockToken(),
+        fghij12345: mockToken()
+      }
+    })
     await createItem(dynamoTables.datasetsTable, dataset)
     const before = await getOne(dynamoTables.datasetsTable, dataset.id)
-    expect(before!.metrics).toHaveProperty('metricOne')
+    expect(before!.tokens).toHaveProperty('fghij12345')
 
     const result = (await execute(
       dataset.id,
-      'metricOne',
+      'fghij12345',
       dataset.user
     )) as APIGatewayProxyStructuredResultV2
 
     expect(result).toHaveProperty('statusCode', 204)
 
     const after = await getOne(dynamoTables.datasetsTable, dataset.id)
-    expect(after!.metrics).not.toHaveProperty('metricOne')
-  })
-
-  it('should delete the metric with a dataset token', async () => {
-    const dataset = mockDynamoDataset()
-    await createItem(dynamoTables.datasetsTable, dataset)
-
-    const result = await deleteMetric(
-      {
-        pathParameters: { datasetId: dataset.id, metricId: 'metricOne' },
-        requestContext: { authorizer: { datasetId: dataset.id } }
-      } as any as CustomAPIGatewayProxyEventV2,
-      {} as Context,
-      {} as Callback<APIGatewayProxyResultV2>
-    )
-
-    expect(result).toHaveProperty('statusCode', 204)
+    expect(after!.tokens).not.toHaveProperty('fghij12345')
   })
 
   it('should return a 404 if the dataset does not exist', async () => {
     const result = (await execute(
       'dataset',
-      'metric',
+      'token',
       'user'
     )) as APIGatewayProxyStructuredResultV2
 
@@ -76,36 +65,36 @@ describe('deleteMetric', () => {
   })
 
   it('should return a 404 if the dataset does not belong to the user', async () => {
-    const dataset = mockDynamoDataset()
+    const dataset = mockDynamoDataset({ tokens: { tokenOne: mockToken() } })
     await createItem(dynamoTables.datasetsTable, dataset)
     const before = await getOne(dynamoTables.datasetsTable, dataset.id)
-    expect(before!.metrics).toHaveProperty('metricOne')
+    expect(before!.tokens).toHaveProperty('tokenOne')
 
     const result = (await execute(
       dataset.id,
-      'metricOne',
+      'tokenOne',
       'wronguser'
     )) as APIGatewayProxyStructuredResultV2
 
     expect(result).toHaveProperty('statusCode', 404)
     const after = await getOne(dynamoTables.datasetsTable, dataset.id)
-    expect(after!.metrics).toHaveProperty('metricOne')
+    expect(after!.tokens).toHaveProperty('tokenOne')
   })
 
-  it('should return a 404 if the metric does not exist', async () => {
-    const dataset = mockDynamoDataset()
+  it('should return a 404 if the token does not exist', async () => {
+    const dataset = mockDynamoDataset({ tokens: { tokenOne: mockToken() } })
     await createItem(dynamoTables.datasetsTable, dataset)
     const before = await getOne(dynamoTables.datasetsTable, dataset.id)
-    expect(before!.metrics).toHaveProperty('metricOne')
+    expect(before!.tokens).toHaveProperty('tokenOne')
 
     const result = (await execute(
       dataset.id,
-      'metricNine',
+      'tokenNine',
       dataset.user
     )) as APIGatewayProxyStructuredResultV2
 
     expect(result).toHaveProperty('statusCode', 404)
     const after = await getOne(dynamoTables.datasetsTable, dataset.id)
-    expect(after!.metrics).toHaveProperty('metricOne')
+    expect(after!.tokens).toHaveProperty('tokenOne')
   })
 })

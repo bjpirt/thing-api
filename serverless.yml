@@ -13,15 +13,18 @@ provider:
     DEFAULT_USER: ${env:DEFAULT_USER, 'admin'}
     DEFAULT_PASSWORD_HASH: ${env:DEFAULT_PASSWORD_HASH, '$2a$10$2eUC591MLNzy5ruk7e61xeZ4J0p9uSFmr62MkiEFEmabQ8w6NZ8Mm'}
     JWT_SECRET: ${env:JWT_SECRET, 'Fqn5J4mgbWzk'}
-  iamRoleStatements:
-    - Effect: Allow
-      Action:
-        - dynamodb:Query
-        - dynamodb:Scan
-        - dynamodb:GetItem
-        - dynamodb:PutItem
-        - dynamodb:UpdateItem
-      Resource: '*'
+  iam:
+    role:
+      name: thing-api-role
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:Query
+            - dynamodb:Scan
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+          Resource: '*'
   httpApi:
     cors: true
     authorizers:
@@ -39,9 +42,9 @@ plugins:
   - serverless-offline
 
 package:
-  exclude:
-    - 'ui/**'
-    - 'node_modules/aws-sdk'
+  patterns:
+    - '!ui/**'
+    - '!node_modules/aws-sdk'
 
 custom:
   dynamodb:
@@ -115,6 +118,22 @@ functions:
       - httpApi:
           path: /datasets/{datasetId}/tokens
           method: post
+          authorizer:
+            name: authorizer
+  getDatasetTokens:
+    handler: api/handlers.getDatasetTokens
+    events:
+      - httpApi:
+          path: /datasets/{datasetId}/tokens
+          method: get
+          authorizer:
+            name: authorizer
+  deleteDatasetToken:
+    handler: api/handlers.deleteDatasetToken
+    events:
+      - httpApi:
+          path: /datasets/{datasetId}/tokens/{tokenId}
+          method: delete
           authorizer:
             name: authorizer
   login:

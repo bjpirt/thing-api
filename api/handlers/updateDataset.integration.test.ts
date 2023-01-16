@@ -21,7 +21,8 @@ const execute = (
   updateDataset(
     {
       body: JSON.stringify(dataset),
-      pathParameters: { datasetId: id }
+      pathParameters: { datasetId: id },
+      requestContext: { authorizer: { user: 'testUser' } }
     } as unknown as APIGatewayProxyEventV2,
     {} as Context,
     {} as Callback<APIGatewayProxyResultV2>
@@ -33,48 +34,6 @@ describe('createDataset', () => {
   beforeEach(async () => {
     dataset = mockDynamoDataset()
     await createItem(dynamoTables.datasetsTable, dataset)
-  })
-
-  it("should return an error if the json won't parse", async () => {
-    const result = await updateDataset(
-      {
-        body: 'notJson',
-        pathParameters: { datasetId: 'foo' }
-      } as unknown as APIGatewayProxyEventV2,
-      {} as Context,
-      {} as Callback<APIGatewayProxyResultV2>
-    )
-    expect(result).toStrictEqual({
-      statusCode: 400,
-      body: JSON.stringify({ errors: ['JSON parsing error'] })
-    })
-  })
-
-  it('should return an error if the body is missing', async () => {
-    const result = await updateDataset(
-      {
-        pathParameters: { datasetId: 'foo' }
-      } as unknown as APIGatewayProxyEventV2,
-      {} as Context,
-      {} as Callback<APIGatewayProxyResultV2>
-    )
-    expect(result).toStrictEqual({
-      statusCode: 400,
-      body: JSON.stringify({ errors: ['Body is missing'] })
-    })
-  })
-
-  it('should return an error if attribute types are wrong', async () => {
-    const result = await execute(dataset.id, {
-      name: 123
-    } as unknown as UpdateDataset)
-
-    expect(result).toStrictEqual({
-      statusCode: 400,
-      body: JSON.stringify({
-        errors: ['Expected string, received number: name']
-      })
-    })
   })
 
   it('should return a 404 if it does not exist', async () => {
@@ -100,6 +59,24 @@ describe('createDataset', () => {
     expect(record!.name).toEqual(datasetUpdate.name)
     expect(record!.description).toEqual(datasetUpdate.description)
     expect(record!.updatedAt).not.toEqual(dataset.updatedAt)
+  })
+
+  it('should update a dataset with a dataset token', async () => {
+    const datasetUpdate: UpdateDataset = {
+      name: 'Updated Name'
+    }
+
+    const result = await updateDataset(
+      {
+        body: JSON.stringify(datasetUpdate),
+        pathParameters: { datasetId: dataset.id },
+        requestContext: { authorizer: { datasetId: dataset.id } }
+      } as unknown as APIGatewayProxyEventV2,
+      {} as Context,
+      {} as Callback<APIGatewayProxyResultV2>
+    )
+
+    expect(result).toHaveProperty('statusCode', 204)
   })
 
   it('should update the metric attributes for an existing metric and add historic values', async () => {
@@ -247,6 +224,27 @@ describe('createDataset', () => {
       id: newMetricId,
       t: isoToEpoch(newTime),
       v: newValue
+    })
+  })
+
+  it('should return a 404 if the user does not match', async () => {
+    const datasetUpdate: UpdateDataset = {
+      name: 'Updated Name',
+      description: 'Updated Description'
+    }
+
+    const result = await updateDataset(
+      {
+        body: JSON.stringify(datasetUpdate),
+        pathParameters: { datasetId: dataset.id },
+        requestContext: { authorizer: { user: 'wrongUser' } }
+      } as unknown as APIGatewayProxyEventV2,
+      {} as Context,
+      {} as Callback<APIGatewayProxyResultV2>
+    )
+
+    expect(result).toStrictEqual({
+      statusCode: 404
     })
   })
 })

@@ -1,35 +1,38 @@
-import { getDatasetId, getUser } from 'api/lib/getAuth'
+import { getUser } from 'api/lib/getAuth'
 import createDocumentClient from '../lib/createDocumentClient'
 import DynamoGateway from '../lib/DynamoGateway'
-import { send204, send401, send404, send500 } from '../lib/httpResponses'
+import { send200, send401, send404, send500 } from '../lib/httpResponses'
 import logger from '../lib/logger'
 import ApiHandler from '../types/ApiHandler'
 import { isError } from '../types/Result'
-import { default as deleteDatasetUseCase } from '../useCases/deleteDataset'
+import { default as getDatasetTokensUseCase } from '../useCases/getDatasetTokens'
 
 const documentClient = createDocumentClient(process.env)
 const dynamoGateway = new DynamoGateway(documentClient)
 
-export const deleteDataset: ApiHandler = async (event) => {
+export const getDatasetTokens: ApiHandler = async (event) => {
   const datasetId = event.pathParameters?.datasetId
   const authUser = getUser(event)
-  const authDatasetId = getDatasetId(event)
 
-  if (!authUser && !authDatasetId) {
+  if (!authUser) {
     return send401()
   }
   if (!datasetId) {
     return send500()
   }
 
-  const result = await deleteDatasetUseCase(datasetId, dynamoGateway, authUser)
-  if (isError(result)) {
-    if (result.message === 'Dataset not found') {
+  const tokens = await getDatasetTokensUseCase(
+    authUser,
+    datasetId,
+    dynamoGateway
+  )
+  if (isError(tokens)) {
+    if (tokens.message === 'Dataset not found') {
       return send404()
     }
-    logger.error(result)
+    logger.error(tokens)
     return send500()
   }
 
-  return send204()
+  return send200(JSON.stringify({ tokens }))
 }

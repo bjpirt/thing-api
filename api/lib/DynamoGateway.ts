@@ -1,4 +1,4 @@
-import { DynamoDatasetKey } from 'api/types/DatasetKey'
+import { DynamoDatasetToken } from 'api/types/DatasetToken'
 import { DocumentClient } from 'aws-sdk/clients/dynamodb'
 import {
   DynamoDataset,
@@ -64,14 +64,22 @@ class DynamoGateway {
   }
 
   deleteMetric(datasetId: string, metricId: string): DynamoGateway {
+    return this.deleteDatasetSubKey(datasetId, 'metrics', metricId)
+  }
+
+  deleteDatasetToken(datasetId: string, tokenId: string): DynamoGateway {
+    return this.deleteDatasetSubKey(datasetId, 'tokens', tokenId)
+  }
+
+  deleteDatasetSubKey(datasetId: string, parentKey: string, childKey: string) {
     const action: DocumentClient.TransactWriteItem = {
       Update: {
         TableName: dynamoTables.datasetsTable,
         Key: { id: datasetId },
-        UpdateExpression: `REMOVE #metrics.#metricId`,
+        UpdateExpression: `REMOVE #parentKey.#childKey`,
         ExpressionAttributeNames: {
-          '#metrics': 'metrics',
-          '#metricId': metricId
+          '#parentKey': parentKey,
+          '#childKey': childKey
         }
       }
     }
@@ -174,16 +182,16 @@ class DynamoGateway {
 
   createDatasetToken(
     datasetId: string,
-    keyId: string,
-    datasetKey: DynamoDatasetKey
+    tokenId: string,
+    datasetToken: DynamoDatasetToken
   ): DynamoGateway {
     this.actions.push({
       Update: {
         TableName: dynamoTables.datasetsTable,
         Key: { id: datasetId },
-        UpdateExpression: `SET #keys.#keyId = :datasetKey`,
-        ExpressionAttributeValues: { ':datasetKey': datasetKey },
-        ExpressionAttributeNames: { '#keys': 'keys', '#keyId': keyId }
+        UpdateExpression: `SET #tokens.#tokenId = :datasetToken`,
+        ExpressionAttributeValues: { ':datasetToken': datasetToken },
+        ExpressionAttributeNames: { '#tokens': 'tokens', '#tokenId': tokenId }
       }
     })
     return this

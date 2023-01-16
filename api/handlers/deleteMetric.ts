@@ -1,3 +1,4 @@
+import { getDatasetId, getUser } from 'api/lib/getAuth'
 import createDocumentClient from '../lib/createDocumentClient'
 import DynamoGateway from '../lib/DynamoGateway'
 import { send204, send401, send404, send500 } from '../lib/httpResponses'
@@ -12,9 +13,10 @@ const dynamoGateway = new DynamoGateway(documentClient)
 export const deleteMetric: ApiHandler = async (event) => {
   const datasetId = event.pathParameters?.datasetId
   const metricId = event.pathParameters?.metricId
-  const user = event.requestContext?.authorizer?.user
+  const authUser = getUser(event)
+  const authDatasetId = getDatasetId(event)
 
-  if (!user) {
+  if (!authUser && !authDatasetId) {
     return send401()
   }
   if (!datasetId || !metricId) {
@@ -22,10 +24,10 @@ export const deleteMetric: ApiHandler = async (event) => {
   }
 
   const result = await deleteMetricUseCase(
-    user,
     datasetId,
     metricId,
-    dynamoGateway
+    dynamoGateway,
+    authUser
   )
   if (isError(result)) {
     if (

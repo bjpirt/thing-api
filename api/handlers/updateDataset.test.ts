@@ -30,7 +30,8 @@ const execute = (
   updateDataset(
     {
       body: JSON.stringify(dataset),
-      pathParameters: { datasetId: 'foo' }
+      pathParameters: { datasetId: 'foo' },
+      requestContext: { authorizer: { user: 'testUser' } }
     } as unknown as APIGatewayProxyEventV2,
     {} as Context,
     {} as Callback<APIGatewayProxyResultV2>
@@ -39,7 +40,7 @@ const execute = (
 describe('createDataset', () => {
   it('should return a 500 error if there is a dynamo error', async () => {
     mockTransactWrite.mockRejectedValue(new Error('Unknown error'))
-    mockGet.mockResolvedValue({ Item: {} })
+    mockGet.mockResolvedValue({ Item: { user: 'testUser' } })
 
     const result = await execute({ name: 'Foo' } as unknown as UpdateDataset)
 
@@ -53,7 +54,8 @@ describe('createDataset', () => {
     const result = await updateDataset(
       {
         body: '{}',
-        pathParameters: {}
+        pathParameters: {},
+        requestContext: { authorizer: { user: 'testUser' } }
       } as unknown as APIGatewayProxyEventV2,
       {} as Context,
       {} as Callback<APIGatewayProxyResultV2>
@@ -62,6 +64,61 @@ describe('createDataset', () => {
     expect(result).toStrictEqual({
       statusCode: 500,
       body: JSON.stringify({ errors: ['Unknown server error'] })
+    })
+  })
+
+  it('should return a 401 error if the auth data is missing', async () => {
+    const result = await updateDataset(
+      {
+        body: '{}',
+        pathParameters: {}
+      } as unknown as APIGatewayProxyEventV2,
+      {} as Context,
+      {} as Callback<APIGatewayProxyResultV2>
+    )
+
+    expect(result).toStrictEqual({ statusCode: 401 })
+  })
+
+  it("should return an error if the json won't parse", async () => {
+    const result = await updateDataset(
+      {
+        body: 'notJson',
+        pathParameters: { datasetId: 'foo' },
+        requestContext: { authorizer: { user: 'testUser' } }
+      } as unknown as APIGatewayProxyEventV2,
+      {} as Context,
+      {} as Callback<APIGatewayProxyResultV2>
+    )
+    expect(result).toStrictEqual({
+      statusCode: 400,
+      body: JSON.stringify({ errors: ['JSON parsing error'] })
+    })
+  })
+
+  it('should return an error if the body is missing', async () => {
+    const result = await updateDataset(
+      {
+        pathParameters: { datasetId: 'foo' },
+        requestContext: { authorizer: { user: 'testUser' } }
+      } as unknown as APIGatewayProxyEventV2,
+      {} as Context,
+      {} as Callback<APIGatewayProxyResultV2>
+    )
+    expect(result).toStrictEqual({
+      statusCode: 400,
+      body: JSON.stringify({ errors: ['Body is missing'] })
+    })
+  })
+
+  it('should return an error if attribute types are wrong', async () => {
+    const result = await execute({ name: 123 } as unknown as UpdateDataset)
+
+    expect(result).toStrictEqual({
+      statusCode: 400,
+      body: JSON.stringify({
+        errors: ['Expected string, received number: name']
+      })
     })
   })
 })

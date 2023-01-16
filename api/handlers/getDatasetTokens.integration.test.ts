@@ -1,6 +1,5 @@
 import { mockDynamoDataset } from 'api/test/mocks'
 import { CustomAPIGatewayProxyEventV2 } from 'api/types/ApiHandler'
-import { OutputDataset } from 'api/types/Dataset'
 import {
   APIGatewayProxyResultV2,
   APIGatewayProxyStructuredResultV2,
@@ -9,7 +8,7 @@ import {
 } from 'aws-lambda'
 import createDynamoConfig from '../lib/createDynamoConfig'
 import { clearDynamoTable, createItem } from '../test/dynamoHelpers'
-import { getDataset } from './getDataset'
+import { getDatasetTokens } from './getDatasetTokens'
 
 const { dynamoTables } = createDynamoConfig(process.env)
 
@@ -17,7 +16,7 @@ const execute = (
   user: string,
   datasetId: string
 ): void | Promise<APIGatewayProxyResultV2> =>
-  getDataset(
+  getDatasetTokens(
     {
       pathParameters: { datasetId },
       requestContext: { authorizer: { user } }
@@ -26,13 +25,21 @@ const execute = (
     {} as Callback<APIGatewayProxyResultV2>
   )
 
-describe('getDataset', () => {
+describe('getDatasetTokens', () => {
   beforeEach(async () => {
     await clearDynamoTable(dynamoTables.datasetsTable)
   })
 
   it('should get the dataset', async () => {
-    const dataset = mockDynamoDataset()
+    const dataset = mockDynamoDataset({
+      tokens: {
+        abcde12345: {
+          name: 'test',
+          createdAt: new Date().toISOString(),
+          methods: ['GET', 'POST']
+        }
+      }
+    })
     await createItem(dynamoTables.datasetsTable, dataset)
 
     const result = (await execute(
@@ -43,24 +50,13 @@ describe('getDataset', () => {
     const { statusCode, body } = result
     expect(statusCode).toBe(200)
 
-    const retrievedDataset = JSON.parse(body!) as OutputDataset
-    expect(retrievedDataset.id).toEqual(dataset.id)
-  })
-
-  it('should get the dataset with a dataset token', async () => {
-    const dataset = mockDynamoDataset()
-    await createItem(dynamoTables.datasetsTable, dataset)
-
-    const result = await getDataset(
+    const retrievedTokens = JSON.parse(body!)
+    expect(retrievedTokens.tokens).toStrictEqual([
       {
-        pathParameters: { datasetId: dataset.id },
-        requestContext: { authorizer: { datasetId: dataset.id } }
-      } as any as CustomAPIGatewayProxyEventV2,
-      {} as Context,
-      {} as Callback<APIGatewayProxyResultV2>
-    )
-
-    expect(result).toHaveProperty('statusCode', 200)
+        id: 'abcde12345',
+        ...dataset.tokens.abcde12345
+      }
+    ])
   })
 
   it('should return a 404 if the dataset does not exist', async () => {

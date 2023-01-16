@@ -1,9 +1,9 @@
-const mockDelete = jest.fn()
+const mockTransactWrite = jest.fn()
 const mockGet = jest.fn()
 jest.mock('aws-sdk/clients/dynamodb', () => {
   return {
     DocumentClient: jest.fn(() => ({
-      delete: () => ({ promise: mockDelete }),
+      transactWrite: () => ({ promise: mockTransactWrite }),
       get: () => ({ promise: mockGet })
     }))
   }
@@ -14,14 +14,14 @@ jest.mock('aws-sdk', () => {
   }
 })
 
-import { mockDynamoDataset } from 'api/test/mocks'
+import { mockDynamoDataset, mockToken } from 'api/test/mocks'
 import { CustomAPIGatewayProxyEventV2 } from 'api/types/ApiHandler'
 import { APIGatewayProxyResultV2, Callback, Context } from 'aws-lambda'
-import { deleteDataset } from './deleteDataset'
+import { deleteDatasetToken } from './deleteDatasetToken'
 
-describe('deleteDataset', () => {
-  it('should return a 401 error if the auth data is not set', async () => {
-    const result = await deleteDataset(
+describe('deleteDatasetToken', () => {
+  it('should return a 401 error if the user is not set', async () => {
+    const result = await deleteDatasetToken(
       {} as CustomAPIGatewayProxyEventV2,
       {} as Context,
       {} as Callback<APIGatewayProxyResultV2>
@@ -33,13 +33,17 @@ describe('deleteDataset', () => {
   })
 
   it('should return a 500 error if there is a dynamo error', async () => {
-    const dataset = mockDynamoDataset()
-    mockDelete.mockRejectedValue(new Error('Unknown error'))
+    const dataset = mockDynamoDataset({
+      tokens: {
+        abcde12345: mockToken()
+      }
+    })
+    mockTransactWrite.mockRejectedValue(new Error('Unknown error'))
     mockGet.mockResolvedValue({ Item: dataset })
 
-    const result = await deleteDataset(
+    const result = await deleteDatasetToken(
       {
-        pathParameters: { datasetId: 'foo' },
+        pathParameters: { datasetId: dataset.id, tokenId: 'abcde12345' },
         requestContext: { authorizer: { user: dataset.user } }
       } as any as CustomAPIGatewayProxyEventV2,
       {} as Context,
@@ -53,8 +57,24 @@ describe('deleteDataset', () => {
   })
 
   it('should return a 500 error if the datasetId is missing', async () => {
-    const result = await deleteDataset(
+    const result = await deleteDatasetToken(
       {
+        requestContext: { authorizer: { user: 'user' } }
+      } as any as CustomAPIGatewayProxyEventV2,
+      {} as Context,
+      {} as Callback<APIGatewayProxyResultV2>
+    )
+
+    expect(result).toStrictEqual({
+      statusCode: 500,
+      body: JSON.stringify({ errors: ['Unknown server error'] })
+    })
+  })
+
+  it('should return a 500 error if the tokenId is missing', async () => {
+    const result = await deleteDatasetToken(
+      {
+        pathParameters: { datasetId: 'foo' },
         requestContext: { authorizer: { user: 'user' } }
       } as any as CustomAPIGatewayProxyEventV2,
       {} as Context,
