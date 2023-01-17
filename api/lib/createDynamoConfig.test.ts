@@ -30,10 +30,12 @@ describe('createDynamoConfig', () => {
     const result = createDynamoConfig({ ...defaultEnv, IS_OFFLINE: 'true' })
     expect(result).toStrictEqual({
       dynamoConfig: {
-        accessKeyId: 'AWS_ACCESS_KEY_ID',
         endpoint: 'http://localhost:8000',
         region: 'localhost',
-        secretAccessKey: 'AWS_SECRET_ACCESS_KEY'
+        credentials: {
+          accessKeyId: 'AWS_ACCESS_KEY_ID',
+          secretAccessKey: 'AWS_SECRET_ACCESS_KEY'
+        }
       },
       dynamoTables: {
         datasetsTable: 'datasetsTable',
@@ -46,10 +48,12 @@ describe('createDynamoConfig', () => {
     const result = createDynamoConfig({ ...defaultEnv, JEST_WORKER_ID: '1' })
     expect(result).toStrictEqual({
       dynamoConfig: {
-        accessKeyId: 'AWS_ACCESS_KEY_ID',
         endpoint: 'http://localhost:8000',
         region: 'localhost',
-        secretAccessKey: 'AWS_SECRET_ACCESS_KEY'
+        credentials: {
+          accessKeyId: 'AWS_ACCESS_KEY_ID',
+          secretAccessKey: 'AWS_SECRET_ACCESS_KEY'
+        }
       },
       dynamoTables: {
         datasetsTable: 'thing-api-dev-datasets',

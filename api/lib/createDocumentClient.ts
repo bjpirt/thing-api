@@ -1,12 +1,14 @@
-import { DynamoDB } from 'aws-sdk'
-import { DocumentClient } from 'aws-sdk/clients/dynamodb'
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
+import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb'
 import createDynamoConfig from './createDynamoConfig'
 
-const createDocumentClient = (env: NodeJS.ProcessEnv): DocumentClient => {
+const createDocumentClient = (
+  env: NodeJS.ProcessEnv
+): DynamoDBDocumentClient => {
   const { dynamoConfig } = createDynamoConfig(env)
-  return new DocumentClient({
-    service: new DynamoDB(dynamoConfig)
-  })
+
+  const from = DynamoDBDocumentClient.from
+  return from(new DynamoDBClient(dynamoConfig))
 }
 
 export default createDocumentClient

@@ -44,7 +44,6 @@ plugins:
 package:
   patterns:
     - '!ui/**'
-    - '!node_modules/aws-sdk'
 
 custom:
   dynamodb:

@@ -1,22 +1,16 @@
-const mockGet = jest.fn()
-jest.mock('aws-sdk/clients/dynamodb', () => {
-  return {
-    DocumentClient: jest.fn(() => ({
-      get: () => ({ promise: mockGet })
-    }))
-  }
-})
-jest.mock('aws-sdk', () => {
-  return {
-    DynamoDB: jest.fn()
-  }
-})
-
+import { DynamoDBDocumentClient, GetCommand } from '@aws-sdk/lib-dynamodb'
 import { CustomAPIGatewayProxyEventV2 } from 'api/types/ApiHandler'
 import { APIGatewayProxyResultV2, Callback, Context } from 'aws-lambda'
+import { mockClient } from 'aws-sdk-client-mock'
 import { getDatasetTokens } from './getDatasetTokens'
 
+const ddbMock = mockClient(DynamoDBDocumentClient)
+
 describe('getDatasetTokens', () => {
+  beforeEach(() => {
+    ddbMock.reset()
+  })
+
   it('should return a 401 error if the user is not set', async () => {
     const result = await getDatasetTokens(
       {} as CustomAPIGatewayProxyEventV2,
@@ -30,7 +24,7 @@ describe('getDatasetTokens', () => {
   })
 
   it('should return a 500 error if there is a dynamo error', async () => {
-    mockGet.mockRejectedValue(new Error('Unknown error'))
+    ddbMock.on(GetCommand).rejects(new Error('Unknown error'))
 
     const result = await getDatasetTokens(
       {

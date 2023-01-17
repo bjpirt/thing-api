@@ -1,25 +1,21 @@
-const mockTransactWrite = jest.fn()
-const mockGet = jest.fn()
-jest.mock('aws-sdk/clients/dynamodb', () => {
-  return {
-    DocumentClient: jest.fn(() => ({
-      transactWrite: () => ({ promise: mockTransactWrite }),
-      get: () => ({ promise: mockGet })
-    }))
-  }
-})
-jest.mock('aws-sdk', () => {
-  return {
-    DynamoDB: jest.fn()
-  }
-})
-
+import {
+  DynamoDBDocumentClient,
+  GetCommand,
+  TransactWriteCommand
+} from '@aws-sdk/lib-dynamodb'
 import { mockDynamoDataset } from 'api/test/mocks'
 import { CustomAPIGatewayProxyEventV2 } from 'api/types/ApiHandler'
 import { APIGatewayProxyResultV2, Callback, Context } from 'aws-lambda'
+import { mockClient } from 'aws-sdk-client-mock'
 import { deleteMetric } from './deleteMetric'
 
+const ddbMock = mockClient(DynamoDBDocumentClient)
+
 describe('deleteMetric', () => {
+  beforeEach(() => {
+    ddbMock.reset()
+  })
+
   it('should return a 401 error if the auth data is not set', async () => {
     const result = await deleteMetric(
       {} as CustomAPIGatewayProxyEventV2,
@@ -34,8 +30,9 @@ describe('deleteMetric', () => {
 
   it('should return a 500 error if there is a dynamo error', async () => {
     const dataset = mockDynamoDataset()
-    mockTransactWrite.mockRejectedValue(new Error('Unknown error'))
-    mockGet.mockResolvedValue({ Item: dataset })
+
+    ddbMock.on(TransactWriteCommand).rejects(new Error('Unknown error'))
+    ddbMock.on(GetCommand).resolves({ Item: dataset })
 
     const result = await deleteMetric(
       {

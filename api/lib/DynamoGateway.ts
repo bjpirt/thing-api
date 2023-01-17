@@ -1,5 +1,13 @@
+import {
+  DeleteCommand,
+  DynamoDBDocumentClient,
+  GetCommand,
+  QueryCommand,
+  QueryCommandInput,
+  TransactWriteCommand,
+  TransactWriteCommandInput
+} from '@aws-sdk/lib-dynamodb'
 import { DynamoDatasetToken } from 'api/types/DatasetToken'
-import { DocumentClient } from 'aws-sdk/clients/dynamodb'
 import {
   DynamoDataset,
   DynamoMetricValue,
@@ -17,32 +25,38 @@ export type GetMetricRangeOptions = {
 }
 
 class DynamoGateway {
-  private actions: DocumentClient.TransactWriteItem[] = []
+  private actions: TransactWriteCommandInput = { TransactItems: [] }
 
-  constructor(private documentClient: DocumentClient) {}
+  constructor(private documentClient: DynamoDBDocumentClient) {}
 
-  async getDatasets(user?: string): PromiseResult<DynamoDataset[]> {
+  async getDatasets(user: string): PromiseResult<DynamoDataset[]> {
+    const queryCommand = new QueryCommand({
+      TableName: dynamoTables.datasetsTable,
+      IndexName: 'userDatasetIndex',
+      KeyConditionExpression: '#user = :user',
+      ExpressionAttributeValues: {
+        ':user': user
+      },
+      ExpressionAttributeNames: {
+        '#user': 'user'
+      }
+    })
+
     return this.documentClient
-      .query({
-        TableName: dynamoTables.datasetsTable,
-        IndexName: 'userDatasetIndex',
-        KeyConditionExpression: '#user = :user',
-        ExpressionAttributeValues: {
-          ':user': user
-        },
-        ExpressionAttributeNames: {
-          '#user': 'user'
-        }
-      })
-      .promise()
+      .send(queryCommand)
       .then((result) => (result.Items ? result.Items : []))
       .catch((e) => e)
   }
 
   async getDataset(id: string): PromiseResult<DynamoDataset> {
-    return this.documentClient
-      .get({ TableName: dynamoTables.datasetsTable, Key: { id } })
-      .promise()
+    const getCommand = new GetCommand({
+      TableName: dynamoTables.datasetsTable,
+      Key: { id }
+    })
+
+    const sendRes = this.documentClient.send(getCommand)
+
+    return sendRes
       .then((result) =>
         result.Item ? result.Item : new Error('Dataset not found')
       )
@@ -50,14 +64,16 @@ class DynamoGateway {
   }
 
   async deleteDataset(id: string): PromiseResult<void> {
-    return this.documentClient
-      .delete({ TableName: dynamoTables.datasetsTable, Key: { id } })
-      .promise()
-      .catch((e) => e)
+    const deleteCommand = new DeleteCommand({
+      TableName: dynamoTables.datasetsTable,
+      Key: { id }
+    })
+
+    return this.documentClient.send(deleteCommand).catch((e) => e)
   }
 
   createDataset(dataset: DynamoDataset): DynamoGateway {
-    this.actions.push({
+    this.actions.TransactItems?.push({
       Put: { TableName: dynamoTables.datasetsTable, Item: dataset }
     })
     return this
@@ -72,7 +88,7 @@ class DynamoGateway {
   }
 
   deleteDatasetSubKey(datasetId: string, parentKey: string, childKey: string) {
-    const action: DocumentClient.TransactWriteItem = {
+    this.actions.TransactItems?.push({
       Update: {
         TableName: dynamoTables.datasetsTable,
         Key: { id: datasetId },
@@ -82,8 +98,7 @@ class DynamoGateway {
           '#childKey': childKey
         }
       }
-    }
-    this.actions.push(action)
+    })
     return this
   }
 
@@ -128,7 +143,7 @@ class DynamoGateway {
       })
     }
 
-    const action: DocumentClient.TransactWriteItem = {
+    this.actions.TransactItems?.push({
       Update: {
         TableName: dynamoTables.datasetsTable,
         Key: { id: dataset.id },
@@ -136,24 +151,23 @@ class DynamoGateway {
         ExpressionAttributeValues: expressionAttributeValues,
         ExpressionAttributeNames: expressionAttributeNames
       }
-    }
-    this.actions.push(action)
+    })
     return this
   }
 
   createMetricValue(metricValue: DynamoMetricValue) {
-    this.actions.push({
+    this.actions.TransactItems?.push({
       Put: { TableName: dynamoTables.metricsTable, Item: metricValue }
     })
     return this
   }
 
   async execute(): PromiseResult<void> {
+    const transactCommand = new TransactWriteCommand(this.actions)
     const result = await this.documentClient
-      .transactWrite({ TransactItems: this.actions })
-      .promise()
+      .send(transactCommand)
       .catch((e) => e)
-    this.actions = []
+    this.actions.TransactItems = []
     return result
   }
 
@@ -163,7 +177,7 @@ class DynamoGateway {
     options: GetMetricRangeOptions
   ): PromiseResult<DynamoMetricValue[]> {
     const id = `${datasetId}-${metricId}`
-    const params: DocumentClient.QueryInput = {
+    const params: QueryCommandInput = {
       TableName: dynamoTables.metricsTable,
       KeyConditionExpression: '#id = :id AND #rangeKey BETWEEN :start AND :end',
       ExpressionAttributeNames: { '#id': 'id', '#rangeKey': 't' },
@@ -173,10 +187,10 @@ class DynamoGateway {
         ':end': isoToEpoch(options.end)
       }
     }
+    const queryCommand = new QueryCommand(params)
     return this.documentClient
-      .query(params)
-      .promise()
-      .then((result) => (result.Items as DynamoMetricValue[]) ?? [])
+      .send(queryCommand)
+      .then((result) => (result.Items as unknown as DynamoMetricValue[]) ?? [])
       .catch((e) => e)
   }
 
@@ -185,7 +199,7 @@ class DynamoGateway {
     tokenId: string,
     datasetToken: DynamoDatasetToken
   ): DynamoGateway {
-    this.actions.push({
+    this.actions.TransactItems?.push({
       Update: {
         TableName: dynamoTables.datasetsTable,
         Key: { id: datasetId },
