@@ -1,28 +1,19 @@
-const mockTransactWrite = jest.fn()
-const mockGet = jest.fn()
-
-jest.mock('aws-sdk/clients/dynamodb', () => {
-  return {
-    DocumentClient: jest.fn(() => ({
-      transactWrite: () => ({ promise: mockTransactWrite }),
-      get: () => ({ promise: mockGet })
-    }))
-  }
-})
-jest.mock('aws-sdk', () => {
-  return {
-    DynamoDB: jest.fn()
-  }
-})
-
+import {
+  DynamoDBDocumentClient,
+  GetCommand,
+  TransactWriteCommand
+} from '@aws-sdk/lib-dynamodb'
 import {
   APIGatewayProxyEventV2,
   APIGatewayProxyResultV2,
   Callback,
   Context
 } from 'aws-lambda'
+import { mockClient } from 'aws-sdk-client-mock'
 import { UpdateDataset } from '../types/Dataset'
 import { updateDataset } from './updateDataset'
+
+const ddbMock = mockClient(DynamoDBDocumentClient)
 
 const execute = (
   dataset: UpdateDataset
@@ -37,10 +28,14 @@ const execute = (
     {} as Callback<APIGatewayProxyResultV2>
   )
 
-describe('createDataset', () => {
+describe('updateDataset', () => {
+  beforeEach(() => {
+    ddbMock.reset()
+  })
+
   it('should return a 500 error if there is a dynamo error', async () => {
-    mockTransactWrite.mockRejectedValue(new Error('Unknown error'))
-    mockGet.mockResolvedValue({ Item: { user: 'testUser' } })
+    ddbMock.on(TransactWriteCommand).rejects(new Error('Unknown error'))
+    ddbMock.on(GetCommand).resolves({ Item: { user: 'testUser' } })
 
     const result = await execute({ name: 'Foo' } as unknown as UpdateDataset)
 

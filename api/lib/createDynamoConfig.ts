@@ -1,7 +1,7 @@
-import { DynamoDB } from 'aws-sdk'
+import { DynamoDBClientConfig } from '@aws-sdk/client-dynamodb'
 
 export type DynamoConfig = {
-  dynamoConfig: DynamoDB.ClientConfiguration
+  dynamoConfig: DynamoDBClientConfig
   dynamoTables: {
     metricsTable: string
     datasetsTable: string
@@ -9,15 +9,17 @@ export type DynamoConfig = {
 }
 
 const createDynamoConfig = (env: NodeJS.ProcessEnv): DynamoConfig => {
-  const dynamoConfig: DynamoDB.ClientConfiguration = {}
+  const dynamoConfig: DynamoDBClientConfig = {}
   let metricsTable = env.METRICS_TABLE
   let datasetsTable = env.DATASETS_TABLE
 
   if (env.IS_OFFLINE || env.JEST_WORKER_ID) {
     dynamoConfig.region = 'localhost'
     dynamoConfig.endpoint = 'http://localhost:8000'
-    dynamoConfig.accessKeyId = 'AWS_ACCESS_KEY_ID'
-    dynamoConfig.secretAccessKey = 'AWS_SECRET_ACCESS_KEY'
+    dynamoConfig.credentials = {
+      accessKeyId: 'AWS_ACCESS_KEY_ID',
+      secretAccessKey: 'AWS_SECRET_ACCESS_KEY'
+    }
     if (env.JEST_WORKER_ID) {
       metricsTable = 'thing-api-dev-metrics'
       datasetsTable = 'thing-api-dev-datasets'

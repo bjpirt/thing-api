@@ -1,26 +1,18 @@
-const mockQuery = jest.fn()
-const mockGet = jest.fn()
-jest.mock('aws-sdk/clients/dynamodb', () => {
-  return {
-    DocumentClient: jest.fn(() => ({
-      query: () => ({ promise: mockQuery }),
-      get: () => ({ promise: mockGet })
-    }))
-  }
-})
-jest.mock('aws-sdk', () => {
-  return {
-    DynamoDB: jest.fn()
-  }
-})
-
+import {
+  DynamoDBDocumentClient,
+  GetCommand,
+  QueryCommand
+} from '@aws-sdk/lib-dynamodb'
 import {
   APIGatewayProxyEventV2,
   APIGatewayProxyResultV2,
   Callback,
   Context
 } from 'aws-lambda'
+import { mockClient } from 'aws-sdk-client-mock'
 import { getMetric } from './getMetric'
+
+const ddbMock = mockClient(DynamoDBDocumentClient)
 
 const execute = (
   datasetId: string,
@@ -38,9 +30,13 @@ const execute = (
     {} as Callback<APIGatewayProxyResultV2>
   )
 
-describe('createDataset', () => {
+describe('getMetric', () => {
+  beforeEach(() => {
+    ddbMock.reset()
+  })
+
   it('should return a 500 error if there is a dynamo error fetching the dataset', async () => {
-    mockGet.mockRejectedValue(new Error('Unknown error'))
+    ddbMock.on(GetCommand).rejects(new Error('Unknown error'))
 
     const result = await execute(
       'datasetId',
@@ -56,10 +52,10 @@ describe('createDataset', () => {
   })
 
   it('should return a 500 error if there is a dynamo error fetching metrics', async () => {
-    mockGet.mockResolvedValue({
+    ddbMock.on(QueryCommand).rejects(new Error('Unknown error'))
+    ddbMock.on(GetCommand).resolves({
       Item: { user: 'testUser', metrics: { metricOne: {} } }
     })
-    mockQuery.mockRejectedValue(new Error('Unknown error'))
 
     const result = await execute(
       'datasetId',

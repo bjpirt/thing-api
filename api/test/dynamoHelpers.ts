@@ -1,46 +1,56 @@
+import {
+  DeleteCommand,
+  GetCommand,
+  PutCommand,
+  QueryCommand,
+  ScanCommand
+} from '@aws-sdk/lib-dynamodb'
 import createDynamoConfig from 'api/lib/createDynamoConfig'
-import { DocumentClient } from 'aws-sdk/clients/dynamodb'
 import createDocumentClient from '../lib/createDocumentClient'
 
 const documentClient = createDocumentClient(process.env)
 const { dynamoTables } = createDynamoConfig(process.env)
 
+type DynamoItem = Record<string, any>
+
 export const createItem = async (
   tableName: string,
   item: object
 ): Promise<void> => {
-  await documentClient
-    .put({
+  await documentClient.send(
+    new PutCommand({
       TableName: tableName,
       Item: item
     })
-    .promise()
+  )
 }
 
 export const getOne = async (
   tableName: string,
   id: string,
   key = 'id'
-): Promise<DocumentClient.AttributeMap | null> => {
+): Promise<DynamoItem | null> => {
   return documentClient
-    .get({
-      TableName: tableName,
-      Key: { [key]: id }
-    })
-    .promise()
+    .send(
+      new GetCommand({
+        TableName: tableName,
+        Key: { [key]: id }
+      })
+    )
     .then((result) => result.Item ?? null)
 }
 
-export const getAll = (tableName: string): Promise<DocumentClient.ItemList> => {
+export const getAll = (tableName: string): Promise<DynamoItem[]> => {
   return documentClient
-    .scan({
-      TableName: tableName
-    })
-    .promise()
+    .send(
+      new ScanCommand({
+        TableName: tableName
+      })
+    )
     .then((result) => result.Items ?? [])
 }
 
-export const getAllMetrics = (id: string): Promise<DocumentClient.ItemList> =>
+export const getAllMetrics = (id: string): Promise<DynamoItem[]> =>
   getRange(dynamoTables.metricsTable, id, 't', 0, 99999999999)
 
 export const getRange = (
@@ -49,15 +59,17 @@ export const getRange = (
   rangeKey: string,
   start: number | string,
   end: number | string
-): Promise<DocumentClient.ItemList> => {
+): Promise<DynamoItem[]> => {
   return documentClient
-    .query({
-      TableName: tableName,
-      KeyConditionExpression: '#id = :id AND #rangeKey BETWEEN :start AND :end',
-      ExpressionAttributeNames: { '#id': 'id', '#rangeKey': rangeKey },
-      ExpressionAttributeValues: { ':id': id, ':start': start, ':end': end }
-    })
-    .promise()
+    .send(
+      new QueryCommand({
+        TableName: tableName,
+        KeyConditionExpression:
+          '#id = :id AND #rangeKey BETWEEN :start AND :end',
+        ExpressionAttributeNames: { '#id': 'id', '#rangeKey': rangeKey },
+        ExpressionAttributeValues: { ':id': id, ':start': start, ':end': end }
+      })
+    )
     .then((result) => result.Items ?? [])
 }
 
@@ -65,19 +77,19 @@ export const clearDynamoTable = async (
   tableName: string,
   keyName = 'id',
   attempts = 5
-) => {
+): Promise<void> => {
   const items = await getAll(tableName)
 
   const promises =
     items?.map((item) =>
-      documentClient
-        .delete({
+      documentClient.send(
+        new DeleteCommand({
           TableName: tableName,
           Key: {
             [keyName]: item[keyName]
           }
         })
-        .promise()
+      )
     ) ?? []
 
   await Promise.all(promises)

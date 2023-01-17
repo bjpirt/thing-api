@@ -2,23 +2,11 @@ process.env.JWT_SECRET = 'abc123'
 const defaultUser = (process.env.DEFAULT_USER = 'testUser')
 process.env.DEFAULT_PASSWORD_HASH = 'dummy'
 
-const mockTransactWrite = jest.fn()
-const mockGet = jest.fn()
-
-jest.mock('aws-sdk/clients/dynamodb', () => {
-  return {
-    DocumentClient: jest.fn(() => ({
-      transactWrite: () => ({ promise: mockTransactWrite }),
-      get: () => ({ promise: mockGet })
-    }))
-  }
-})
-jest.mock('aws-sdk', () => {
-  return {
-    DynamoDB: jest.fn()
-  }
-})
-
+import {
+  DynamoDBDocumentClient,
+  GetCommand,
+  TransactWriteCommand
+} from '@aws-sdk/lib-dynamodb'
 import { CreateDatasetToken } from 'api/types/DatasetToken'
 import {
   APIGatewayProxyEventV2,
@@ -26,7 +14,10 @@ import {
   Callback,
   Context
 } from 'aws-lambda'
+import { mockClient } from 'aws-sdk-client-mock'
 import { createDatasetToken } from './createDatasetToken'
+
+const ddbMock = mockClient(DynamoDBDocumentClient)
 
 const execute = (
   id: string,
@@ -43,7 +34,11 @@ const execute = (
     {} as Callback<APIGatewayProxyResultV2>
   )
 
-describe('createDataset', () => {
+describe('createDatasetToken', () => {
+  beforeEach(() => {
+    ddbMock.reset()
+  })
+
   it("should return an error if the json won't parse", async () => {
     const result = await createDatasetToken(
       {
@@ -115,8 +110,8 @@ describe('createDataset', () => {
   })
 
   it('should return a 500 error if there is a dynamo error', async () => {
-    mockTransactWrite.mockRejectedValue(new Error('Unknown error'))
-    mockGet.mockResolvedValue({ Item: { user: defaultUser } })
+    ddbMock.on(TransactWriteCommand).rejects(new Error('Unknown error'))
+    ddbMock.on(GetCommand).resolves({ Item: { user: defaultUser } })
 
     const result = await execute('datasetId', {
       name: 'TestToken',
