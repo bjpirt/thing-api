@@ -14,7 +14,9 @@ export type Handler<TEvent = any, TResult = any> = (
 ) => Promise<TResult>
 
 type CustomAPIGatewayEventRequestContextV2 = APIGatewayEventRequestContextV2 & {
-  authorizer?: AuthContext
+  authorizer?: {
+    lambda?: AuthContext
+  }
 }
 
 export type CustomAPIGatewayProxyEventV2 =

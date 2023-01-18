@@ -8,4 +8,13 @@ export type DatasetAuthContext = {
 
 export type NullAuthContext = Record<string, never>
 
-export type AuthContext = UserAuthContext | DatasetAuthContext | NullAuthContext
+type WorkaroundAuthContext = {
+  lambda: AuthContextData
+}
+
+export type AuthContextData =
+  | UserAuthContext
+  | DatasetAuthContext
+  | NullAuthContext
+
+export type AuthContext = AuthContextData | WorkaroundAuthContext

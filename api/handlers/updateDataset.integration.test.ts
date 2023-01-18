@@ -22,7 +22,7 @@ const execute = (
     {
       body: JSON.stringify(dataset),
       pathParameters: { datasetId: id },
-      requestContext: { authorizer: { user: 'testUser' } }
+      requestContext: { authorizer: { lambda: { user: 'testUser' } } }
     } as unknown as APIGatewayProxyEventV2,
     {} as Context,
     {} as Callback<APIGatewayProxyResultV2>
@@ -70,7 +70,7 @@ describe('createDataset', () => {
       {
         body: JSON.stringify(datasetUpdate),
         pathParameters: { datasetId: dataset.id },
-        requestContext: { authorizer: { datasetId: dataset.id } }
+        requestContext: { authorizer: { lambda: { datasetId: dataset.id } } }
       } as unknown as APIGatewayProxyEventV2,
       {} as Context,
       {} as Callback<APIGatewayProxyResultV2>
@@ -237,7 +237,7 @@ describe('createDataset', () => {
       {
         body: JSON.stringify(datasetUpdate),
         pathParameters: { datasetId: dataset.id },
-        requestContext: { authorizer: { user: 'wrongUser' } }
+        requestContext: { authorizer: { lambda: { user: 'wrongUser' } } }
       } as unknown as APIGatewayProxyEventV2,
       {} as Context,
       {} as Callback<APIGatewayProxyResultV2>

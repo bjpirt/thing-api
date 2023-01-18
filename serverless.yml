@@ -25,6 +25,8 @@ provider:
             - dynamodb:PutItem
             - dynamodb:UpdateItem
           Resource: '*'
+  logs:
+    httpApi: true
   httpApi:
     cors: true
     authorizers:

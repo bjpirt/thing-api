@@ -20,7 +20,7 @@ const execute = (
   getDataset(
     {
       pathParameters: { datasetId },
-      requestContext: { authorizer: { user } }
+      requestContext: { authorizer: { lambda: { user } } }
     } as any as CustomAPIGatewayProxyEventV2,
     {} as Context,
     {} as Callback<APIGatewayProxyResultV2>
@@ -54,7 +54,7 @@ describe('getDataset', () => {
     const result = await getDataset(
       {
         pathParameters: { datasetId: dataset.id },
-        requestContext: { authorizer: { datasetId: dataset.id } }
+        requestContext: { authorizer: { lambda: { datasetId: dataset.id } } }
       } as any as CustomAPIGatewayProxyEventV2,
       {} as Context,
       {} as Callback<APIGatewayProxyResultV2>

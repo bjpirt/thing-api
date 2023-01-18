@@ -19,7 +19,7 @@ const execute = (
   deleteDataset(
     {
       pathParameters: { datasetId },
-      requestContext: { authorizer: { user } }
+      requestContext: { authorizer: { lambda: { user } } }
     } as any as CustomAPIGatewayProxyEventV2,
     {} as Context,
     {} as Callback<APIGatewayProxyResultV2>
@@ -55,7 +55,7 @@ describe('deleteDataset', () => {
     const result = await deleteDataset(
       {
         pathParameters: { datasetId: dataset.id },
-        requestContext: { authorizer: { datasetId: dataset.id } }
+        requestContext: { authorizer: { lambda: { datasetId: dataset.id } } }
       } as any as CustomAPIGatewayProxyEventV2,
       {} as Context,
       {} as Callback<APIGatewayProxyResultV2>

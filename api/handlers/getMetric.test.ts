@@ -24,7 +24,7 @@ const execute = (
     {
       pathParameters: { datasetId, metricId },
       queryStringParameters: { start, end },
-      requestContext: { authorizer: { user: 'testUser' } }
+      requestContext: { authorizer: { lambda: { user: 'testUser' } } }
     } as unknown as APIGatewayProxyEventV2,
     {} as Context,
     {} as Callback<APIGatewayProxyResultV2>

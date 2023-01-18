@@ -16,7 +16,7 @@ const { dynamoTables } = createDynamoConfig(process.env)
 const execute = (user: string): void | Promise<APIGatewayProxyResultV2> =>
   getDatasets(
     {
-      requestContext: { authorizer: { user } }
+      requestContext: { authorizer: { lambda: { user } } }
     } as CustomAPIGatewayProxyEventV2,
     {} as Context,
     {} as Callback<APIGatewayProxyResultV2>

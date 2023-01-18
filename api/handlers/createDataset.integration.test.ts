@@ -14,7 +14,7 @@ const execute = (
   createDataset(
     {
       body: JSON.stringify(dataset),
-      requestContext: { authorizer: { user: 'test' } }
+      requestContext: { authorizer: { lambda: { user: 'test' } } }
     } as CustomAPIGatewayProxyEventV2,
     {} as Context,
     {} as Callback<APIGatewayProxyResultV2>
