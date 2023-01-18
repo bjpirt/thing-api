@@ -14,11 +14,9 @@ const extractTokenFromHeaders = (
   if (!event.headers) {
     return false
   }
-  if (
-    event.headers.Authorization &&
-    event.headers.Authorization.startsWith('Bearer')
-  ) {
-    return decodeToken(event.headers.Authorization.replace('Bearer ', ''))
+  const header = event.headers.Authorization || event.headers.authorization
+  if (header && header.startsWith('Bearer')) {
+    return decodeToken(header.replace('Bearer ', ''))
   }
   return false
 }

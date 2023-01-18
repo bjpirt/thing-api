@@ -17,7 +17,7 @@ const execute = (
   createDataset(
     {
       body: JSON.stringify(dataset),
-      requestContext: { authorizer: { user: 'test' } }
+      requestContext: { authorizer: { lambda: { user: 'test' } } }
     } as CustomAPIGatewayProxyEventV2,
     {} as Context,
     {} as Callback<APIGatewayProxyResultV2>
@@ -32,7 +32,7 @@ describe('createDataset', () => {
     const result = await createDataset(
       {
         body: 'notJson',
-        requestContext: { authorizer: { user: 'test' } }
+        requestContext: { authorizer: { lambda: { user: 'test' } } }
       } as CustomAPIGatewayProxyEventV2,
       {} as Context,
       {} as Callback<APIGatewayProxyResultV2>
@@ -46,7 +46,7 @@ describe('createDataset', () => {
   it('should return an error if the body is missing', async () => {
     const result = await createDataset(
       {
-        requestContext: { authorizer: { user: 'test' } }
+        requestContext: { authorizer: { lambda: { user: 'test' } } }
       } as CustomAPIGatewayProxyEventV2,
       {} as Context,
       {} as Callback<APIGatewayProxyResultV2>

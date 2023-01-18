@@ -27,7 +27,7 @@ const execute = (
     {
       body: JSON.stringify(dataset),
       pathParameters: { datasetId: id },
-      requestContext: { authorizer: { user } }
+      requestContext: { authorizer: { lambda: { user } } }
     } as unknown as APIGatewayProxyEventV2,
     {} as Context,
     {} as Callback<APIGatewayProxyResultV2>

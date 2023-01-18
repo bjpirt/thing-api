@@ -41,7 +41,7 @@ describe('deleteDatasetToken', () => {
     const result = await deleteDatasetToken(
       {
         pathParameters: { datasetId: dataset.id, tokenId: 'abcde12345' },
-        requestContext: { authorizer: { user: dataset.user } }
+        requestContext: { authorizer: { lambda: { user: dataset.user } } }
       } as any as CustomAPIGatewayProxyEventV2,
       {} as Context,
       {} as Callback<APIGatewayProxyResultV2>
@@ -56,7 +56,7 @@ describe('deleteDatasetToken', () => {
   it('should return a 500 error if the datasetId is missing', async () => {
     const result = await deleteDatasetToken(
       {
-        requestContext: { authorizer: { user: 'user' } }
+        requestContext: { authorizer: { lambda: { user: 'user' } } }
       } as any as CustomAPIGatewayProxyEventV2,
       {} as Context,
       {} as Callback<APIGatewayProxyResultV2>
@@ -72,7 +72,7 @@ describe('deleteDatasetToken', () => {
     const result = await deleteDatasetToken(
       {
         pathParameters: { datasetId: 'foo' },
-        requestContext: { authorizer: { user: 'user' } }
+        requestContext: { authorizer: { lambda: { user: 'user' } } }
       } as any as CustomAPIGatewayProxyEventV2,
       {} as Context,
       {} as Callback<APIGatewayProxyResultV2>

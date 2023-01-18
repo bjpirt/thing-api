@@ -22,7 +22,7 @@ const execute = (
     {
       body: JSON.stringify(dataset),
       pathParameters: { datasetId: 'foo' },
-      requestContext: { authorizer: { user: 'testUser' } }
+      requestContext: { authorizer: { lambda: { user: 'testUser' } } }
     } as unknown as APIGatewayProxyEventV2,
     {} as Context,
     {} as Callback<APIGatewayProxyResultV2>
@@ -50,7 +50,7 @@ describe('updateDataset', () => {
       {
         body: '{}',
         pathParameters: {},
-        requestContext: { authorizer: { user: 'testUser' } }
+        requestContext: { authorizer: { lambda: { user: 'testUser' } } }
       } as unknown as APIGatewayProxyEventV2,
       {} as Context,
       {} as Callback<APIGatewayProxyResultV2>
@@ -80,7 +80,7 @@ describe('updateDataset', () => {
       {
         body: 'notJson',
         pathParameters: { datasetId: 'foo' },
-        requestContext: { authorizer: { user: 'testUser' } }
+        requestContext: { authorizer: { lambda: { user: 'testUser' } } }
       } as unknown as APIGatewayProxyEventV2,
       {} as Context,
       {} as Callback<APIGatewayProxyResultV2>
@@ -95,7 +95,7 @@ describe('updateDataset', () => {
     const result = await updateDataset(
       {
         pathParameters: { datasetId: 'foo' },
-        requestContext: { authorizer: { user: 'testUser' } }
+        requestContext: { authorizer: { lambda: { user: 'testUser' } } }
       } as unknown as APIGatewayProxyEventV2,
       {} as Context,
       {} as Callback<APIGatewayProxyResultV2>

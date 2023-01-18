@@ -20,7 +20,7 @@ const execute = (
   deleteDatasetToken(
     {
       pathParameters: { datasetId, tokenId },
-      requestContext: { authorizer: { user } }
+      requestContext: { authorizer: { lambda: { user } } }
     } as any as CustomAPIGatewayProxyEventV2,
     {} as Context,
     {} as Callback<APIGatewayProxyResultV2>

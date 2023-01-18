@@ -20,7 +20,7 @@ const execute = (
   deleteMetric(
     {
       pathParameters: { datasetId, metricId },
-      requestContext: { authorizer: { user } }
+      requestContext: { authorizer: { lambda: { user } } }
     } as any as CustomAPIGatewayProxyEventV2,
     {} as Context,
     {} as Callback<APIGatewayProxyResultV2>
@@ -56,7 +56,7 @@ describe('deleteMetric', () => {
     const result = await deleteMetric(
       {
         pathParameters: { datasetId: dataset.id, metricId: 'metricOne' },
-        requestContext: { authorizer: { datasetId: dataset.id } }
+        requestContext: { authorizer: { lambda: { datasetId: dataset.id } } }
       } as any as CustomAPIGatewayProxyEventV2,
       {} as Context,
       {} as Callback<APIGatewayProxyResultV2>

@@ -29,7 +29,7 @@ describe('getDatasetTokens', () => {
     const result = await getDatasetTokens(
       {
         pathParameters: { datasetId: 'foo' },
-        requestContext: { authorizer: { user: 'user' } }
+        requestContext: { authorizer: { lambda: { user: 'user' } } }
       } as any as CustomAPIGatewayProxyEventV2,
       {} as Context,
       {} as Callback<APIGatewayProxyResultV2>
@@ -44,7 +44,7 @@ describe('getDatasetTokens', () => {
   it('should return a 500 error if the datasetId is missing', async () => {
     const result = await getDatasetTokens(
       {
-        requestContext: { authorizer: { user: 'user' } }
+        requestContext: { authorizer: { lambda: { user: 'user' } } }
       } as any as CustomAPIGatewayProxyEventV2,
       {} as Context,
       {} as Callback<APIGatewayProxyResultV2>

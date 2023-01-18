@@ -28,7 +28,7 @@ describe('getDatasets', () => {
 
     const result = await getDatasets(
       {
-        requestContext: { authorizer: { user: 'user' } }
+        requestContext: { authorizer: { lambda: { user: 'user' } } }
       } as CustomAPIGatewayProxyEventV2,
       {} as Context,
       {} as Callback<APIGatewayProxyResultV2>

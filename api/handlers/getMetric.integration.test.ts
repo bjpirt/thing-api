@@ -30,7 +30,7 @@ const execute = (
     {
       pathParameters: { datasetId, metricId },
       queryStringParameters: { start, end },
-      requestContext: { authorizer: { user } }
+      requestContext: { authorizer: { lambda: { user } } }
     } as unknown as APIGatewayProxyEventV2,
     {} as Context,
     {} as Callback<APIGatewayProxyResultV2>
@@ -80,7 +80,7 @@ describe('createDataset', () => {
           start: '2023-01-01T00:00:00Z',
           end: '2023-01-01T02:00:00Z'
         },
-        requestContext: { authorizer: { datasetId: dataset.id } }
+        requestContext: { authorizer: { lambda: { datasetId: dataset.id } } }
       } as unknown as APIGatewayProxyEventV2,
       {} as Context,
       {} as Callback<APIGatewayProxyResultV2>
