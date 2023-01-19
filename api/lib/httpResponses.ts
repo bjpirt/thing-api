@@ -1,3 +1,4 @@
+import KeyValuePair from 'api/types/KeyValuePair'
 import { APIGatewayProxyResultV2 } from 'aws-lambda'
 import ErrorResponse from '../types/ErrorResponse'
 
@@ -25,9 +26,13 @@ type Headers = {
   [k: string]: string
 }
 
-export const send200 = (body: string): APIGatewayProxyResultV2 => ({
+export const send200 = (
+  body: string,
+  headers: KeyValuePair<string, string> = {}
+): APIGatewayProxyResultV2 => ({
   statusCode: 200,
-  body
+  body,
+  headers
 })
 
 export const send201 = (headers: Headers): APIGatewayProxyResultV2 => ({

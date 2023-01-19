@@ -45,7 +45,7 @@ plugins:
 
 package:
   patterns:
-    - '!ui/**'
+    - 'ui/build/**'
 
 custom:
   dynamodb:
@@ -143,6 +143,12 @@ functions:
       - httpApi:
           path: /login
           method: post
+  ui:
+    handler: api/handlers.ui
+    events:
+      - httpApi:
+          path: /
+          method: get
   authorizer:
     handler: api/handlers.authorizer
     description: Lambda for the authorizer function
